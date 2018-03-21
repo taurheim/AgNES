@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <list>
 #include "token.h"
 
 class Scanner {
@@ -11,10 +12,11 @@ class Scanner {
         int line;
         int pos;
         char ch;
+        bool debug = true;
 
     public:
         Scanner(std::ifstream & input);
-        void scan();
+        std::list<Token> scan();
 
         void getChar();
         Token getNextToken();

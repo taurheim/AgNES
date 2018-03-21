@@ -67,10 +67,19 @@ Token Scanner::identifyNumber() {
     return numberToken;
 }
 
-void Scanner::scan() {
+std::list<Token> Scanner::scan() {
     getChar();
+
+    std::list<Token> tokenList;
     while (!input.eof()) {
-        std::cout << tokenToStr(getNextToken()) << " ";
+        tokenList.push_back(getNextToken());
     }
-    std::cout << "\n";
+
+    if (debug) {
+        for (auto const & i : tokenList) {
+            std::cout << tokenToStr(i) << " ";
+        }
+    }
+
+    return tokenList;
 }
