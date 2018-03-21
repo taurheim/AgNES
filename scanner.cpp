@@ -1,4 +1,5 @@
 #include "scanner.h"
+#include <cctype>
 
 Scanner::Scanner(std::ifstream & input) 
     : input (input) {
