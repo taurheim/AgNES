@@ -4,10 +4,6 @@
 #include "astNode.h"
 #include "util/tokenUtil.h"
 
-struct AST {
-    ProgramNode * root;
-};
-
 class Parser {
     public:
         explicit Parser(std::list<Token> & tokens);
@@ -16,7 +12,7 @@ class Parser {
         std::list<Token> & tokens;
         std::list<Token>::iterator tokenIterator;
 
-        AST tree;
+        ASTNode * root;
 
         Token t;
         void next();
@@ -24,19 +20,19 @@ class Parser {
         void reject();
 
         // Non-terminals
-        ProgramNode * program(); // { <function> | <declaration> }
-        DeclarationNode * declaration();
+        ASTNode * program(); // { <function> | <declaration> }
+        ASTNode * declaration();
         void * variableDeclaration();
         void * parameterList(); // <parameter> | parameterList "," <parameter>
-        ParameterNode * parameter(); // <typeSpecifier> <identifier>
-        FunctionNode * function(); // <typeSpecifier> <identifier> "(" [<parameter-list>] ")" "{" {<statement>} "}"
+        ASTNode * parameter(); // <typeSpecifier> <identifier>
+        ASTNode * function(); // <typeSpecifier> <identifier> "(" [<parameter-list>] ")" "{" {<statement>} "}"
         void * statement(); // if, else, etc.
         void * assignment(); // <identifier> [ "[" <expression> "]" ] "=" <expression>
-        ExpressionNode * expression(); // FROM THING (adding, subtracting, etc.)
+        ASTNode * expression(); // FROM THING (adding, subtracting, etc.)
 
         // Terminals
-        TypeNode * type(); // <type>
-        IdentifierNode * identifier();
+        ASTNode * type(); // <type>
+        ASTNode * identifier();
         void number(); // Number token
         void binaryOperation();
         void logicalOperation();

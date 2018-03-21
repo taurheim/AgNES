@@ -3,35 +3,39 @@
 #include <list>
 
 enum ASTNodeType {
-    PARAMETER,
-};
-
-enum CType {
-    CTYPE_INT,
-    CTYPE_CHAR,
-    CTYPE_VOID
-};
-
-enum ExpressionType {
-    ADD
+    AST_NONTERMINAL,
+    AST_IDENTIFIER,
+    AST_NUMBER,
+    AST_TYPE
 };
 
 struct ASTNode {
-    ASTNodeType nodeType;
+    ASTNodeType nodeType = AST_NONTERMINAL;
+    std::list<ASTNode*> children;
 };
 
 struct TypeNode : ASTNode {
-    CType type;
+    TypeNode() {
+        nodeType = AST_TYPE;
+    }
+    std::string typeString;
 };
 
 struct IdentifierNode : ASTNode {
+    IdentifierNode() {
+        nodeType = AST_IDENTIFIER;
+    }
     std::string name;
 };
 
 struct NumberNode : ASTNode {
+    NumberNode() {
+        nodeType = AST_NUMBER;
+    }
     int value;
 };
 
+/*
 struct ParameterNode : ASTNode {
     TypeNode * paramType;
     IdentifierNode * paramName;
@@ -69,3 +73,4 @@ struct AssignmentNode : ASTNode {
     ExpressionNode * newValue;
     ExpressionNode * arraySelectorExpression;
 };
+*/

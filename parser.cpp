@@ -9,9 +9,9 @@ Parser::Parser(std::list<Token> & tokens) : tokens (tokens) {
 }
 
 void Parser::parse() {
-    tree.root = program();
+    root = program();
 
-    printTree(tree.root);
+    printAST(root);
 }
 
 void Parser::next() {
@@ -19,7 +19,7 @@ void Parser::next() {
     t = *tokenIterator;
 }
 
-ProgramNode * Parser::program() {
+ASTNode * Parser::program() {
     /*
         {<function> | <declaration>}
 
@@ -32,32 +32,32 @@ ProgramNode * Parser::program() {
     // Perform lookahead
     auto decider = *std::next(tokenIterator, 2);
 
-    ProgramNode * node = new ProgramNode();
+    ASTNode * node = new ASTNode();
     ASTNode * childNode;
 
     if(decider.type == SEMI) {
-        childNode = (ASTNode*) declaration();
+        childNode = declaration();
     } else if (decider.type == LPAREN) {
-        childNode = (ASTNode*) function();
+        childNode = function();
     } else {
         reject();
     }
 
-    node->programBody.push_back(childNode);
+    node->children.push_back(childNode);
 
     return node;
 }
 
-FunctionNode * Parser::function() {
-    FunctionNode * node = new FunctionNode();
+ASTNode * Parser::function() {
+    ASTNode * node = new ASTNode();
 
-    node->returnType = type();
-    node->functionName = identifier();
+    node->children.push_back(type());
+    node->children.push_back(identifier());
 
-    return nullptr;
+    return node;
 }
 
-IdentifierNode * Parser::identifier() {
+ASTNode * Parser::identifier() {
     if (t.type != TokenType::IDENT) {
         reject();
     }
@@ -69,21 +69,21 @@ IdentifierNode * Parser::identifier() {
     return node;
 }
 
-TypeNode * Parser::type() {
+ASTNode * Parser::type() {
     if (t.type != TokenType::INT) {
         reject();
     }
 
     TypeNode * node = new TypeNode();
-    node->type = CType::CTYPE_INT;
+    node->typeString = "int";
 
     next();
     return node;
 }
 
-DeclarationNode * Parser::declaration() {
+ASTNode * Parser::declaration() {
     std::cout << "(declaration)";
-    return nullptr;
+    return new ASTNode();
 }
 
 void Parser::reject() {
