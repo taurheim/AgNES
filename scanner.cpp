@@ -76,9 +76,11 @@ std::list<Token> Scanner::scan() {
     }
 
     if (debug) {
+        std::cout << "Scanner output: \n\t";
         for (auto const & i : tokenList) {
             std::cout << tokenToStr(i) << " ";
         }
+        std::cout << std::endl;
     }
 
     return tokenList;

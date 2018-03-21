@@ -21,4 +21,7 @@ int main() {
     // Next we run Syntax Analysis/Parsing, where we generate a parse tree
     // Input: list of tokens
     // Output: parse tree
+
+
+    std::cout << "Finished Compilation.";
 }
