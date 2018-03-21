@@ -1,4 +1,5 @@
 #pragma once
+
 #include <map>
 #include "../token.h"
 #include <string>
@@ -19,7 +20,7 @@ static std::map<TokenType, std::string> tokenToStrMap = {
     { NUM, "NUM" },
 };
 
-std::string tokenToStr(Token t) {
+static std::string tokenToStr(Token t) {
     auto search = tokenToStrMap.find(t.type);
     if (search == tokenToStrMap.end()) {
         return "TOKEN_UTIL_MISSING_TOKEN";

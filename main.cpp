@@ -3,6 +3,7 @@
 #include <fstream>
 #include "scanner.h"
 #include "token.h"
+#include "parser.h"
 
 int main() {
     // First we run Lexical Analysis, to turn the stream of characters into a list of tokens
@@ -21,7 +22,8 @@ int main() {
     // Next we run Syntax Analysis/Parsing, where we generate a parse tree
     // Input: list of tokens
     // Output: parse tree
+    Parser parser = Parser(tokens);
+    parser.parse();
 
-
-    std::cout << "Finished Compilation.";
+    std::cout << "Finished Compilation." << std::endl;
 }

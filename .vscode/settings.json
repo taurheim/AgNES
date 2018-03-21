@@ -41,7 +41,8 @@
         "xstring": "cpp",
         "xtr1common": "cpp",
         "xtree": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "list": "cpp"
     },
     "python.linting.pylintEnabled": false
 }

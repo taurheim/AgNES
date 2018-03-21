@@ -8,7 +8,7 @@
       "type": "shell",
       "command": "g++",
       "args": [
-        "-g", "-std=c++11", "main.cpp", "scanner.cpp"
+        "-g", "-std=c++11", "main.cpp", "scanner.cpp", "parser.cpp"
       ],
       "group": {
         "kind": "build",
