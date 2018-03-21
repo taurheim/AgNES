@@ -32,7 +32,7 @@ ASTNode * Parser::program() {
     // Perform lookahead
     auto decider = *std::next(tokenIterator, 2);
 
-    ASTNode * node = new ASTNode();
+    ASTNode * node = new ASTNode(AST_PROGRAM);
     ASTNode * childNode;
 
     if(decider.type == SEMI) {
@@ -49,7 +49,7 @@ ASTNode * Parser::program() {
 }
 
 ASTNode * Parser::function() {
-    ASTNode * node = new ASTNode();
+    ASTNode * node = new ASTNode(AST_FUNCTION);
 
     node->children.push_back(type());
     node->children.push_back(identifier());
@@ -83,7 +83,7 @@ ASTNode * Parser::type() {
 
 ASTNode * Parser::declaration() {
     std::cout << "(declaration)";
-    return new ASTNode();
+    return new ASTNode(AST_DECLARATION);
 }
 
 void Parser::reject() {

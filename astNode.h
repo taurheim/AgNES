@@ -3,34 +3,37 @@
 #include <list>
 
 enum ASTNodeType {
-    AST_NONTERMINAL,
+    AST_UNDEFINED,
+    AST_PROGRAM,
+    AST_FUNCTION,
+    AST_DECLARATION,
     AST_IDENTIFIER,
     AST_NUMBER,
     AST_TYPE
 };
 
 struct ASTNode {
-    ASTNodeType nodeType = AST_NONTERMINAL;
+    explicit ASTNode(ASTNodeType type) {
+        nodeType = type;
+    }
+    ASTNodeType nodeType;
     std::list<ASTNode*> children;
 };
 
 struct TypeNode : ASTNode {
-    TypeNode() {
-        nodeType = AST_TYPE;
+    TypeNode() : ASTNode(AST_TYPE) {
     }
     std::string typeString;
 };
 
 struct IdentifierNode : ASTNode {
-    IdentifierNode() {
-        nodeType = AST_IDENTIFIER;
+    IdentifierNode() : ASTNode(AST_IDENTIFIER) {
     }
     std::string name;
 };
 
 struct NumberNode : ASTNode {
-    NumberNode() {
-        nodeType = AST_NUMBER;
+    NumberNode() : ASTNode(AST_NUMBER) {
     }
     int value;
 };

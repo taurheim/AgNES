@@ -5,7 +5,9 @@
 #include "../astNode.h"
 
 static std::map<ASTNodeType, std::string> nodeTypeToString = {
-    {AST_NONTERMINAL, "NONTERMINAL"},
+    {AST_PROGRAM, "PROGRAM"},
+    {AST_FUNCTION, "FUNCTION"},
+    {AST_DECLARATION, "DECLARATION"},
     {AST_IDENTIFIER, "IDENTIFIER"},
     {AST_NUMBER, "NUMBER"},
     {AST_TYPE, "TYPE"},
