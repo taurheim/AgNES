@@ -1,5 +1,7 @@
 #pragma once
-enum Symbol {
+#include <string>
+
+enum TokenType {
     EQUALS,
     PLUS,
     MINUS,
@@ -12,4 +14,10 @@ enum Symbol {
     RETURN,
     IDENT,
     NUM
+};
+
+struct Token {
+    TokenType type;
+    std::string stringVal;
+    int intVal;
 };

@@ -2,8 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "symbol.h"
-#include "symbolMaps.h"
+#include "token.h"
 
 class Scanner {
 
@@ -14,13 +13,13 @@ class Scanner {
         char ch;
 
     public:
-
         Scanner(std::ifstream & input);
-        void getChar();
-        Symbol getSym();
-        Symbol identifyKeyword();
-        Symbol identifyChar();
-        Symbol identifyNumber();
         void scan();
+
+        void getChar();
+        Token getNextToken();
+        Token identifyKeyword();
+        Token identifyChar();
+        Token identifyNumber();
 
 };

@@ -1,5 +1,8 @@
-#include "scanner.h"
 #include <cctype>
+#include <string.h>
+#include "scanner.h"
+#include "tokenMaps.h"
+#include "util/tokenUtil.h"
 
 Scanner::Scanner(std::ifstream & input) 
     : input (input) {
@@ -13,8 +16,8 @@ void Scanner::getChar() {
     //std::cout << ch;
 }
 
-Symbol Scanner::getSym() {
-    Symbol sym;
+Token Scanner::getNextToken() {
+    Token sym;
     while (std::isspace(ch)) getChar(); // skip to next non-whitespace character
     if (std::isalpha(ch)) sym = identifyKeyword();
     else if (std::isdigit(ch)) sym = identifyNumber();
@@ -22,42 +25,52 @@ Symbol Scanner::getSym() {
     return sym;
 }
 
-Symbol Scanner::identifyKeyword() {
+Token Scanner::identifyKeyword() {
     std::string word;
     while (std::isalpha(ch)) { // create string... TODO: include numeric
         word += ch;
         getChar();
     }
-    auto search = stringToSymbol.find(word);
-    if (search == stringToSymbol.end()) {
-        return Symbol::IDENT;
+    auto search = stringToToken.find(word);
+    if (search == stringToToken.end()) {
+        Token identToken;
+        identToken.type = TokenType::IDENT;
+        identToken.stringVal = word;
+        return identToken;
     } else {
-        return search->second;
+        return { search->second };
     }
 }
 
-Symbol Scanner::identifyChar() {
-    auto search = charToSymbol.find(ch);
-    if (search == charToSymbol.end()) {
+Token Scanner::identifyChar() {
+    auto search = charToToken.find(ch);
+    if (search == charToToken.end()) {
         std::cerr << "Invalid character!";
         exit(1);
     } else {
         getChar();
-        return search->second;
+        return { search->second };
     }
 }
 
-Symbol Scanner::identifyNumber() {
-    int num;
+Token Scanner::identifyNumber() {
+    Token numberToken;
+    numberToken.type = TokenType::NUM;
+    numberToken.intVal = 0;
+
+    // Go through all the digits to get the full number
     while (std::isdigit(ch)) {
-        num = num * 10 + (ch - '0');
+        numberToken.intVal = (numberToken.intVal * 10) + (ch - '0');
         getChar();
     }
-    return Symbol::NUM;
+
+    return numberToken;
 }
 
 void Scanner::scan() {
     getChar();
-    while (!input.eof()) std::cout << getSym() << "\n";
+    while (!input.eof()) {
+        std::cout << tokenToStr(getNextToken()) << " ";
+    }
     std::cout << "\n";
 }
