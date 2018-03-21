@@ -15,7 +15,7 @@ class Scanner {
         bool debug = true;
 
     public:
-        Scanner(std::ifstream & input);
+        explicit Scanner(std::ifstream & input);
         std::list<Token> scan();
 
         void getChar();
