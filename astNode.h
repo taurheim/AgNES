@@ -18,6 +18,7 @@ enum ASTNodeType {
     AST_BINARYEXPRESSION,
     AST_OPERATOR,
     AST_KEYWORD,
+    AST_VARDECLARATION,
 };
 
 struct ASTNode {

@@ -17,6 +17,7 @@ static std::map<ASTNodeType, std::string> nodeTypeToString = {
     {AST_ASSIGNMENT, "ASSIGNMENT"},
     {AST_EXPRESSION, "EXPRESSION"},
     {AST_OPERATOR, "OPERATOR"},
+    {AST_VARDECLARATION, "VARDECLARATION"},
 };
 
 static void printNode(std::string indent, bool last, ASTNode * node) {

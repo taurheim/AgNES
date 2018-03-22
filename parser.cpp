@@ -43,13 +43,11 @@ ASTNode * Parser::program() {
 
         ASTNode * childNode;
 
-        if(decider == SEMI) {
-            childNode = declaration();
-            expect(SEMI);
-        } else if (decider == LPAREN) {
+        if(decider == LPAREN) {
             childNode = function();
         } else {
-            reject("program(): Expected LPAREN or SEMI");
+            childNode = declaration();
+            expect(SEMI);
         }
 
         node->children.push_back(childNode);
@@ -147,11 +145,29 @@ ASTNode * Parser::type() {
 ASTNode * Parser::declaration() {
     /*
         TODO full coverage
-        <type> <identifier>
+        <type> <variableDeclaration> { "," variableDeclaration }
     */
     ASTNode * node = new ASTNode(AST_DECLARATION);
     node->children.push_back(type());
+    node->children.push_back(variableDeclaration());
+
+    while (t.type == COMMA) {
+        next();
+        node->children.push_back(variableDeclaration());
+    }
+    return node;
+}
+
+ASTNode * Parser::variableDeclaration() {
+    /*
+        <identifier> [ "[" <number> "]" ]
+    */
+    ASTNode * node = new ASTNode(AST_VARDECLARATION);
+
     node->children.push_back(identifier());
+    
+    // TODO array
+
     return node;
 }
 

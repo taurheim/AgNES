@@ -24,7 +24,7 @@ class Parser {
         // Non-terminals
         ASTNode * program(); // { <function> | <declaration> }
         ASTNode * declaration();
-        void * variableDeclaration();
+        ASTNode * variableDeclaration();
         ASTNode * parameterList(); // <parameter> | parameterList "," <parameter>
         ASTNode * parameter(); // <typeSpecifier> <identifier>
         ASTNode * function(); // <typeSpecifier> <identifier> "(" [<parameter-list>] ")" "{" {<statement>} "}"
