@@ -11,7 +11,8 @@ static std::map<char, TokenType> charToToken = {
     {'(', TokenType::LPAREN},
     {')', TokenType::RPAREN},
     {'{', TokenType::LCURLY},
-    {'}', TokenType::RCURLY}
+    {'}', TokenType::RCURLY},
+    {',', TokenType::COMMA},
 };
 
 static std::map<std::string, TokenType> stringToToken = {

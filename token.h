@@ -13,7 +13,8 @@ enum TokenType {
     INT,
     RETURN,
     IDENT,
-    NUM
+    NUM,
+    COMMA,
 };
 
 struct Token {

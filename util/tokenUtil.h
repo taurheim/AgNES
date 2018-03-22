@@ -18,6 +18,7 @@ static std::map<TokenType, std::string> tokenToStrMap = {
     { RETURN, "RETURN" },
     { IDENT, "IDENT" },
     { NUM, "NUM" },
+    { COMMA, "COMMA" },
 };
 
 static std::string tokenToStr(Token t) {
