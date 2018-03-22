@@ -282,7 +282,7 @@ ASTNode * Parser::expression() {
 
     switch(t.type) {
         case NUM: {
-            next();
+            node->children.push_back(number());
             break;
         }
         default: {
@@ -314,5 +314,16 @@ ASTNode * Parser::op() {
     }
 
     next();
+    return node;
+}
+
+ASTNode * Parser::number() {
+    /*
+        Terminal
+    */
+    NumberNode * node = new NumberNode();
+    node->value = t.intVal;
+
+    expect(NUM);
     return node;
 }

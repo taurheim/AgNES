@@ -47,6 +47,12 @@ static void printNode(std::string indent, bool last, ASTNode * node) {
             nodeString.append(")");
             break;
         }
+        case AST_NUMBER: {
+            NumberNode * number = static_cast<NumberNode*>(node);
+            nodeString = "Number: ";
+            nodeString.append(std::to_string(number->value));
+            break;
+        }
         default: {
             auto search = nodeTypeToString.find(node->nodeType);
             if (search != nodeTypeToString.end()) {

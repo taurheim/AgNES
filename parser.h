@@ -37,5 +37,5 @@ class Parser {
         ASTNode * type(); // <type>
         ASTNode * identifier();
         ASTNode * op();
-        void number(); // Number token
+        ASTNode * number(); // Number token
 };
