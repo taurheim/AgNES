@@ -75,6 +75,9 @@ std::list<Token> Scanner::scan() {
         tokenList.push_back(getNextToken());
     }
 
+    Token eofToken = { EOF_TOKEN };
+    tokenList.push_back(eofToken);
+
     if (debug) {
         std::cout << "Scanner output: \n\t";
         for (auto const & i : tokenList) {

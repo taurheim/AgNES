@@ -15,6 +15,7 @@ enum TokenType {
     IDENT,
     NUM,
     COMMA,
+    EOF_TOKEN,
 };
 
 struct Token {

@@ -19,6 +19,7 @@ static std::map<TokenType, std::string> tokenToStrMap = {
     { IDENT, "IDENT" },
     { NUM, "NUM" },
     { COMMA, "COMMA" },
+    { EOF_TOKEN, "EOF" },
 };
 
 static std::string tokenToStr(Token t) {

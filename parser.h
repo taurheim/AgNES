@@ -16,25 +16,26 @@ class Parser {
 
         Token t;
         void next();
+        void expect(const TokenType & type);
+        TokenType lookahead(int amount);
 
-        void reject();
+        void reject(std::string const & str);
 
         // Non-terminals
         ASTNode * program(); // { <function> | <declaration> }
         ASTNode * declaration();
         void * variableDeclaration();
-        void * parameterList(); // <parameter> | parameterList "," <parameter>
+        ASTNode * parameterList(); // <parameter> | parameterList "," <parameter>
         ASTNode * parameter(); // <typeSpecifier> <identifier>
         ASTNode * function(); // <typeSpecifier> <identifier> "(" [<parameter-list>] ")" "{" {<statement>} "}"
-        void * statement(); // if, else, etc.
-        void * assignment(); // <identifier> [ "[" <expression> "]" ] "=" <expression>
+        ASTNode * statement(); // if, else, etc.
+        ASTNode * assignment(); // <identifier> [ "[" <expression> "]" ] "=" <expression>
         ASTNode * expression(); // FROM THING (adding, subtracting, etc.)
+        ASTNode * binaryExpression();
 
         // Terminals
         ASTNode * type(); // <type>
         ASTNode * identifier();
+        ASTNode * op();
         void number(); // Number token
-        void binaryOperation();
-        void logicalOperation();
-        void compareOperation();
 };

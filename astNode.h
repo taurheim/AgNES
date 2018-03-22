@@ -9,7 +9,15 @@ enum ASTNodeType {
     AST_DECLARATION,
     AST_IDENTIFIER,
     AST_NUMBER,
-    AST_TYPE
+    AST_TYPE,
+    AST_PARAMETERLIST,
+    AST_PARAMETER,
+    AST_STATEMENT,
+    AST_ASSIGNMENT,
+    AST_EXPRESSION,
+    AST_BINARYEXPRESSION,
+    AST_OPERATOR,
+    AST_KEYWORD,
 };
 
 struct ASTNode {
@@ -36,6 +44,18 @@ struct NumberNode : ASTNode {
     NumberNode() : ASTNode(AST_NUMBER) {
     }
     int value;
+};
+
+struct OpNode : ASTNode {
+    OpNode() : ASTNode(AST_OPERATOR) {
+    }
+    std::string operation; // TODO enum
+};
+
+struct StatementNode : ASTNode {
+    StatementNode() : ASTNode(AST_STATEMENT) {
+    }
+    std::string type;
 };
 
 /*
