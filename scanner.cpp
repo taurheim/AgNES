@@ -13,14 +13,15 @@ Scanner::Scanner(std::ifstream & input)
 
 void Scanner::getChar() {
     input.get(ch);
-    //std::cout << ch;
+    std::cout << ch;
 }
 
 Token Scanner::getNextToken() {
     Token sym;
-    while (std::isspace(ch)) getChar(); // skip to next non-whitespace character
+    while (std::isspace(ch) && !input.eof()) getChar(); // skip to next non-whitespace character
     if (std::isalpha(ch)) sym = identifyKeyword();
     else if (std::isdigit(ch)) sym = identifyNumber();
+    else if (input.eof()) sym = { EOF_TOKEN };
     else sym = identifyChar();
     return sym;
 }
@@ -71,12 +72,12 @@ std::list<Token> Scanner::scan() {
     getChar();
 
     std::list<Token> tokenList;
-    while (!input.eof()) {
-        tokenList.push_back(getNextToken());
-    }
+    while (true) {
+        Token t = getNextToken();
+        tokenList.push_back(t);
 
-    Token eofToken = { EOF_TOKEN };
-    tokenList.push_back(eofToken);
+        if (t.type == EOF_TOKEN) break;
+    }
 
     if (debug) {
         std::cout << "Scanner output: \n\t";
