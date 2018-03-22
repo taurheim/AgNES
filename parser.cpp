@@ -156,7 +156,8 @@ ASTNode * Parser::declaration() {
 }
 
 void Parser::reject(std::string const & str) {
-    std::cout << "FUCK YOU: " << str << " -- " << tokenToStr(t) << std::endl;
+    std::cout << "[FUCK YOU] " << str << " { Got: " << tokenToStr(t) << "}" << std::endl;
+
     exit(1);
 }
 
@@ -171,7 +172,7 @@ void Parser::expect(const TokenType & type) {
             nodeString = "NOTFOUND";
         }
         err.append(nodeString);
-        reject("Expected: ");
+        reject(err);
     } else {
         // Consume
         next();
@@ -258,6 +259,7 @@ ASTNode * Parser::assignment() {
 
     expect(EQUALS);
     node->children.push_back(expression());
+    expect(SEMI);
 
     return node;
 }
@@ -271,26 +273,39 @@ ASTNode * Parser::expression() {
     /*
         "-" <expression>
         | "!" <expression>
-        | <identifier> [ "(" [ <expression> { "," <expression> }] ")" | "[" <expression> "]"]
         | "(" <expression> ")"
         | <number>
         | <char>
         | <string>
+        | <identifier> "(" [ <expression> { "," <expression> }] ")" 
+        | <identifier>  "[" <expression> "]"
+        | <identifier>
         | <expression> <binaryOperation> <expression>
     */
     ASTNode * node = new ASTNode(AST_EXPRESSION);
 
     switch(t.type) {
+        case SEMI: {
+            std::cout << "End expression" << std::endl;
+            break;
+        }
         case NUM: {
             node->children.push_back(number());
             break;
         }
-        default: {
+        case IDENT: {
             node->children.push_back(identifier());
-            node->children.push_back(op());
-            node->children.push_back(expression());
             break;
         }
+        default: {
+        }
+    }
+
+    if(t.type == PLUS || t.type == MINUS) {
+        node->children.push_back(op());
+        node->children.push_back(expression());
+    } else if (t.type == LPAREN) {
+        // Function call
     }
 
     return node;
