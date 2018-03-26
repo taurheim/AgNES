@@ -172,7 +172,7 @@ ASTNode * Parser::variableDeclaration() {
 }
 
 void Parser::reject(std::string const & str) {
-    std::cout << "[FUCK YOU] " << str << " { Got: " << tokenToStr(t) << "}" << std::endl;
+    std::cout << "[FUCK YOU] " << str << " { Got: " << tokenToStr(t) << " }" << std::endl;
 
     exit(1);
 }
@@ -301,10 +301,6 @@ ASTNode * Parser::expression() {
     ASTNode * node = new ASTNode(AST_EXPRESSION);
 
     switch(t.type) {
-        case SEMI: {
-            std::cout << "End expression" << std::endl;
-            break;
-        }
         case NUM: {
             node->children.push_back(number());
             break;
@@ -314,6 +310,7 @@ ASTNode * Parser::expression() {
             break;
         }
         default: {
+            reject("Expression expected IDENT or NUM");
         }
     }
 

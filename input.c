@@ -6,8 +6,9 @@ int setxtofive() {
 }
 
 int main() {
-    x = x + 1;
-    y = x;
+    x = x +1;
+    y = 3;
     setxtofive();
     return 0;
 }
+
