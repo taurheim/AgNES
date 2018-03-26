@@ -7,7 +7,7 @@
 class Parser {
     public:
         explicit Parser(std::list<Token> & tokens);
-        void parse();
+        ASTNode * parse();
     private:
         std::list<Token> & tokens;
         std::list<Token>::iterator tokenIterator;

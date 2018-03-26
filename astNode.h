@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
-#include <list>
+#include <vector>
+#include "varType.h"
 
 enum ASTNodeType {
     AST_UNDEFINED,
@@ -26,13 +27,13 @@ struct ASTNode {
         nodeType = type;
     }
     ASTNodeType nodeType;
-    std::list<ASTNode*> children;
+    std::vector<ASTNode*> children;
 };
 
 struct TypeNode : ASTNode {
     TypeNode() : ASTNode(AST_TYPE) {
     }
-    std::string typeString;
+    VarType varType;
 };
 
 struct IdentifierNode : ASTNode {

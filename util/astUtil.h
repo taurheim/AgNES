@@ -20,6 +20,10 @@ static std::map<ASTNodeType, std::string> nodeTypeToString = {
     {AST_VARDECLARATION, "VARDECLARATION"},
 };
 
+static std::map<VarType, std::string> varTypeToString = {
+    {VT_INT, "int"}
+};
+
 static void printNode(std::string indent, bool last, ASTNode * node) {
     std::string nodeString;
     switch(node->nodeType) {
@@ -32,7 +36,12 @@ static void printNode(std::string indent, bool last, ASTNode * node) {
         case AST_TYPE: {
             TypeNode * type = static_cast<TypeNode*>(node);
             nodeString = "Type: ";
-            nodeString.append(type->typeString);
+            auto search = varTypeToString.find(type->varType);
+            if (search != varTypeToString.end()) {
+                nodeString.append(search->second);
+            } else {
+                nodeString.append("NOTFOUND");
+            }
             break;
         }
         case AST_OPERATOR: {

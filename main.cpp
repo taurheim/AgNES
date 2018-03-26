@@ -4,6 +4,8 @@
 #include "scanner.h"
 #include "token.h"
 #include "parser.h"
+#include "semanticAnalyzer.h"
+#include "astNode.h"
 
 int main() {
     // First we run Lexical Analysis, to turn the stream of characters into a list of tokens
@@ -23,7 +25,12 @@ int main() {
     // Input: list of tokens
     // Output: parse tree
     Parser parser = Parser(tokens);
-    parser.parse();
+    ASTNode * astRoot = parser.parse();
+
+    //Now we make a SemanticAnalyzer!
+    std::cout << "Running semantic analysis..." << std::endl;
+    SemanticAnalyzer analyzer = SemanticAnalyzer(astRoot);
+    analyzer.analyze();
 
     std::cout << "Finished Compilation." << std::endl;
 }

@@ -9,10 +9,10 @@ Parser::Parser(std::list<Token> & tokens) : tokens (tokens) {
     t = *tokenIterator;
 }
 
-void Parser::parse() {
+ASTNode * Parser::parse() {
     root = program();
-
     printAST(root);
+    return root;
 }
 
 void Parser::next() {
@@ -136,7 +136,7 @@ ASTNode * Parser::type() {
     }
 
     TypeNode * node = new TypeNode();
-    node->typeString = "int";
+    node->varType = VT_INT;
 
     next();
     return node;
