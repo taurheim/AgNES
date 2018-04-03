@@ -58,22 +58,13 @@ ASTNode * Parser::program() {
 
 ASTNode * Parser::function() {
     /*
-        <type> <identifier> "(" [<parameterList>] ")" "{" {<statement>} "}"
+        <type> <identifier> <parameterList> <functionBody>
     */
     ASTNode * node = new ASTNode(AST_FUNCTION);
 
     node->children.push_back(type());
     node->children.push_back(identifier());
-
-    expect(LPAREN);
-
-    // Check for params
-    if (t.type != RPAREN) {
-        node->children.push_back(parameterList());
-    }
-
-    expect(RPAREN);
-
+    node->children.push_back(parameterList());
     node->children.push_back(functionBody());
 
     return node;
@@ -95,15 +86,25 @@ ASTNode * Parser::functionBody() {
 
 ASTNode * Parser::parameterList() {
     /*
-        <parameter> {"," <parameter> }
+        "(" [<parameter> {"," <parameter> }] ")"
     */
     ASTNode * node = new ASTNode(AST_PARAMETERLIST);
 
-    node->children.push_back(parameter());
+    expect(LPAREN);
 
-    while (t.type == COMMA) {
+    if(t.type != RPAREN) {
+        // We have one or more parameters
         node->children.push_back(parameter());
+
+        // Consume the rest of the params
+        while(t.type == COMMA) {
+            expect(COMMA);
+            node->children.push_back(parameter());
+        }
     }
+
+    
+    expect(RPAREN);
 
     return node;
 }

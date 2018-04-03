@@ -6,7 +6,7 @@ class SemanticAnalyzer {
 
     public:
         SemanticAnalyzer(ASTNode * root);
-        void analyze();
+        SymbolTable * analyze();
     
     private:
         ASTNode * root;

@@ -6,6 +6,7 @@
 #include "parser.h"
 #include "semanticAnalyzer.h"
 #include "astNode.h"
+#include "symbolTable.h"
 
 int main() {
     // First we run Lexical Analysis, to turn the stream of characters into a list of tokens

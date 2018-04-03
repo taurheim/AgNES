@@ -1,6 +1,6 @@
 int x, y;
 
-int setxto(int to) {
+int setxto(int to, int from) {
      x = to;
      return x;
 }

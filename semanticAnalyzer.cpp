@@ -1,14 +1,19 @@
 #include <iostream>
 #include "semanticAnalyzer.h"
 #include "varType.h"
+#include "util/symbolTableUtil.h"
 
 SemanticAnalyzer::SemanticAnalyzer(ASTNode * root)
     : root (root) {
     symbolTable = new SymbolTable();
 }
 
-void SemanticAnalyzer::analyze() {
+SymbolTable * SemanticAnalyzer::analyze() {
     parseNode(root);
+
+    printSymbolTable(symbolTable);
+
+    return symbolTable;
 }
 
 void SemanticAnalyzer::parseNode(ASTNode * node) {
@@ -31,7 +36,7 @@ void SemanticAnalyzer::parseNode(ASTNode * node) {
                         // Second child of AST_FUNCTION is an Identifier
                         IdentifierNode * idNode = (IdentifierNode *)(*i);
                         std::string varName = idNode->name;
-                        symbolTable->addVariable(varType, varName);
+                        symbolTable->addFunction(varType, varName);
                     } else {
                         parseNode(childNode);
                     }
@@ -40,18 +45,19 @@ void SemanticAnalyzer::parseNode(ASTNode * node) {
             }
         case AST_PARAMETERLIST:
             {
+                // Open the scope for the body of the function
+                symbolTable->openScope();
                 for (auto i = node->children.begin(); i != node->children.end(); i++) {
                     ASTNode * childNode = *i; // Parameter
                     TypeNode * paramType = (TypeNode*) childNode->children[0];
                     IdentifierNode * paramIdentifier = (IdentifierNode*) childNode->children[1];
 
-                    symbolTable->addVariable(paramType->varType, paramIdentifier->name);
+                    symbolTable->addParam(paramType->varType, paramIdentifier->name);
                 }
                 break;
             }
         case AST_FUNCTIONBODY:
             {
-                symbolTable->openScope();
                 for (auto & n : node->children) {
                     parseNode(n);
                 }

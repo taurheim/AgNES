@@ -8,13 +8,24 @@ SymbolTable::SymbolTable()
     boolDescriptor = new STTypeDescriptor(VT_BOOL);
 
     universe = new STEntry(ST_HEAD, 0);
-    innerScope = universe;
+    currentScope = universe;
     currentLevel = 0;
 };
 
 void SymbolTable::addVariable(VarType varType, std::string varName) {
+    addEntry(ST_VAR, varType, varName);
+};
 
-    STEntry * scopeIterator = innerScope;
+void SymbolTable::addFunction(VarType returnType, std::string functionName) {
+    addEntry(ST_FUNCTION, returnType, functionName);
+};
+
+void SymbolTable::addParam(VarType paramType, std::string paramName) {
+    addEntry(ST_PARAM, paramType, paramName);
+}
+
+void SymbolTable::addEntry(STEntryType entryType, VarType varType, std::string varName) {
+    STEntry * scopeIterator = currentScope;
     while (scopeIterator->next != nullptr) {
         if (scopeIterator->next->name == varName) {
             std::cout << "Object name already exists in scope: " << varName << std::endl;
@@ -26,7 +37,7 @@ void SymbolTable::addVariable(VarType varType, std::string varName) {
     STTypeDescriptor * typeDescriptor = new STTypeDescriptor(varType);
     STEntry * newEntry = new STEntry();
     newEntry->name = varName;
-    newEntry->entryType = ST_VAR;
+    newEntry->entryType = entryType;
     newEntry->level = currentLevel;
     newEntry->typeDescriptor = typeDescriptor;
     scopeIterator->next = newEntry;
@@ -34,17 +45,20 @@ void SymbolTable::addVariable(VarType varType, std::string varName) {
 
 void SymbolTable::openScope() {
     currentLevel++;
-    STEntry * oldScope = innerScope;
-    innerScope = new STEntry(ST_HEAD, currentLevel);
-    innerScope->outerScope = oldScope;
+    STEntry * oldScope = currentScope;
+    currentScope = new STEntry(ST_HEAD, currentLevel);
+    
+    // Fix references
+    currentScope->parentScope = oldScope;
+    oldScope->childScopes.push_back(currentScope);
 }
 
 void SymbolTable::closeScope() {
-    innerScope = innerScope->outerScope;
+    currentScope = currentScope->parentScope;
 }
 
 STEntry * SymbolTable::lookup(std::string name) {
-    STEntry * head = innerScope;
+    STEntry * head = currentScope;
     STEntry * currentEntry;
     while (head != nullptr) {
          currentEntry = head->next;
@@ -58,14 +72,14 @@ STEntry * SymbolTable::lookup(std::string name) {
              break;
          }
 
-        head = head->outerScope;
+        head = head->parentScope;
     }
 
     return nullptr;
 }
 
 void SymbolTable::print() {
-    STEntry * head = innerScope;
+    STEntry * head = currentScope;
     STEntry * currentEntry;
     std::cout << "innerScope" << std::endl;
     while (head != nullptr) {
@@ -78,7 +92,11 @@ void SymbolTable::print() {
             currentEntry = currentEntry->next;
          }
          std::cout << " -> guard " << std::endl;
-         head = head->outerScope;
+         head = head->parentScope;
     }
+}
+
+STEntry * SymbolTable::getRoot() {
+    return universe;
 }
 

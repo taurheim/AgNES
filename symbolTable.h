@@ -32,7 +32,8 @@ struct STEntry {
     //optionals
     STTypeDescriptor * typeDescriptor;
     STEntry * next;
-    STEntry * outerScope; // scope directly outside this scope, for ST_HEAD only (aka "desc")
+    STEntry * parentScope; // scope directly outside this scope, for ST_HEAD only (aka "desc")
+    std::list<STEntry*> childScopes; // scopes directly within this scope, for ST_HEAD only
     std::string name;
     // int intVal;
     // char charVal;
@@ -47,8 +48,10 @@ struct STEntry {
 class SymbolTable {
 
     private:
+        void addEntry(STEntryType entryType, VarType varType, std::string varName);
+
         STEntry * universe;
-        STEntry * innerScope;
+        STEntry * currentScope;
         int currentLevel;
 
         STTypeDescriptor * intDescriptor;
@@ -61,6 +64,8 @@ class SymbolTable {
         void closeScope();
         void print();
         void addVariable(VarType type, std::string varName);
+        void addFunction(VarType returnType, std::string functionName);
+        void addParam(VarType paramType, std::string paramName);
         STEntry * lookup(std::string name);
-
+        STEntry * getRoot();
 };
