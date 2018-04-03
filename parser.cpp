@@ -73,6 +73,14 @@ ASTNode * Parser::function() {
     }
 
     expect(RPAREN);
+
+    node->children.push_back(functionBody());
+
+    return node;
+}
+
+ASTNode * Parser::functionBody() {
+    ASTNode * node = new ASTNode(AST_FUNCTIONBODY);
     expect(LCURLY);
 
     // 0 or more statements

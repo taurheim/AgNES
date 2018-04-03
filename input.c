@@ -1,14 +1,16 @@
 int x, y;
 
-int setxtofive() {
-     x = 5;
+int setxto(int to) {
+     x = to;
      return x;
 }
+
+int z;
 
 int main() {
     x = x +1;
     y = 3;
-    setxtofive();
+    setxto(y);
     return 0;
 }
 

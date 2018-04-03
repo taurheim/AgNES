@@ -9,7 +9,7 @@ Tools:
 Instructions:
 1. Compile (or write by hand) an assembly file (game.s)
 2. wla-6502 game.s
-3. (only needed once) Create wlalink file: echo "[objects]\ngame.o"
+3. (only needed once) Create wlalink file: echo "[objects]\ngame.o" > linkfile
 4. wlalink linkfile game.rom
 5. cat header.bin game.rom > game.nes
 6. Run the game.nes file in FCEUX

@@ -54,8 +54,14 @@ STEntry * SymbolTable::lookup(std::string name) {
              }
              currentEntry = currentEntry->next;
          }
-         head = head->outerScope;
+         if(head == universe) {
+             break;
+         }
+
+        head = head->outerScope;
     }
+
+    return nullptr;
 }
 
 void SymbolTable::print() {

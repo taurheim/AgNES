@@ -27,7 +27,8 @@ class Parser {
         ASTNode * variableDeclaration();
         ASTNode * parameterList(); // <parameter> | parameterList "," <parameter>
         ASTNode * parameter(); // <typeSpecifier> <identifier>
-        ASTNode * function(); // <typeSpecifier> <identifier> "(" [<parameter-list>] ")" "{" {<statement>} "}"
+        ASTNode * function(); // <typeSpecifier> <identifier> "(" [<parameter-list>] ")" <functionBody>
+        ASTNode * functionBody(); // "{" {<statement>} "}"
         ASTNode * statement(); // if, else, etc.
         ASTNode * assignment(); // <identifier> [ "[" <expression> "]" ] "=" <expression>
         ASTNode * expression(); // FROM THING (adding, subtracting, etc.)

@@ -20,6 +20,7 @@ enum ASTNodeType {
     AST_OPERATOR,
     AST_KEYWORD,
     AST_VARDECLARATION,
+    AST_FUNCTIONBODY,
 };
 
 struct ASTNode {
