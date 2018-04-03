@@ -8,9 +8,9 @@ int setxto(int to, int from) {
 int z;
 
 int main() {
-    x = x +1;
+    x = 5 + (1 + 3) + 6;
     y = 3;
-    setxto(y);
+    setxto(y, 7);
     return 0;
 }
 

@@ -311,11 +311,31 @@ ASTNode * Parser::expression() {
 
     switch(t.type) {
         case NUM: {
-            node->children.push_back(number());
+            ASTNode * numberNode = number();
+            if (t.type == PLUS || t.type == MINUS) {
+                ASTNode * expressionNode = new ASTNode(AST_EXPRESSION);
+                expressionNode->children.push_back(numberNode);
+                node->children.push_back(expressionNode);
+            } else {
+                node->children.push_back(numberNode);
+            }
             break;
         }
         case IDENT: {
-            node->children.push_back(identifier());
+            ASTNode * identNode = identifier();
+            if (t.type == PLUS || t.type == MINUS) {
+                ASTNode * expressionNode = new ASTNode(AST_EXPRESSION);
+                expressionNode->children.push_back(identNode);
+                node->children.push_back(expressionNode);
+            } else {
+                node->children.push_back(identNode);
+            }
+            break;
+        }
+        case LPAREN: {
+            expect(LPAREN);
+            node->children.push_back(expression());
+            expect(RPAREN);
             break;
         }
         default: {

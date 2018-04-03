@@ -24,7 +24,7 @@ static void printEntry(std::string indent, bool last, STEntry * entry) {
         indent.append("| ");
     }
 
-    std::cout << nodeString;
+    std::cout << nodeString << ":" << entry->scopeId;
 
     // Print all variables at this scope
     STEntry * currentEntry = entry->next;

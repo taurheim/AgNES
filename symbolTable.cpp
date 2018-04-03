@@ -2,14 +2,13 @@
 #include "symbolTable.h"
 
 SymbolTable::SymbolTable()
-: currentLevel (0) {
+: currentScopeId (0) {
     intDescriptor = new STTypeDescriptor(VT_INT);
     charDescriptor = new STTypeDescriptor(VT_CHAR);
     boolDescriptor = new STTypeDescriptor(VT_BOOL);
 
     universe = new STEntry(ST_HEAD, 0);
     currentScope = universe;
-    currentLevel = 0;
 };
 
 void SymbolTable::addVariable(VarType varType, std::string varName) {
@@ -38,15 +37,15 @@ void SymbolTable::addEntry(STEntryType entryType, VarType varType, std::string v
     STEntry * newEntry = new STEntry();
     newEntry->name = varName;
     newEntry->entryType = entryType;
-    newEntry->level = currentLevel;
+    newEntry->scopeId = currentScopeId;
     newEntry->typeDescriptor = typeDescriptor;
     scopeIterator->next = newEntry;
 };
 
 void SymbolTable::openScope() {
-    currentLevel++;
+    currentScopeId++;
     STEntry * oldScope = currentScope;
-    currentScope = new STEntry(ST_HEAD, currentLevel);
+    currentScope = new STEntry(ST_HEAD, currentScopeId);
     
     // Fix references
     currentScope->parentScope = oldScope;

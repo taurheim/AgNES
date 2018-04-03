@@ -7,6 +7,7 @@
 #include "semanticAnalyzer.h"
 #include "astNode.h"
 #include "symbolTable.h"
+#include "irGenerator.h"
 
 int main() {
     // First we run Lexical Analysis, to turn the stream of characters into a list of tokens
@@ -32,6 +33,11 @@ int main() {
     std::cout << "Running semantic analysis..." << std::endl;
     SemanticAnalyzer analyzer = SemanticAnalyzer(astRoot);
     analyzer.analyze();
+
+    // Generate intermediate code
+    std::cout << "Running IR Generator..." << std::endl;
+    IRGenerator irGenerator = IRGenerator(astRoot);
+    irGenerator.generate();
 
     std::cout << "Finished Compilation." << std::endl;
 }

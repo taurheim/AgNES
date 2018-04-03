@@ -28,7 +28,7 @@ struct STTypeDescriptor {
 struct STEntry {
     //mandatory
     STEntryType entryType;
-    int level;
+    int scopeId;
     //optionals
     STTypeDescriptor * typeDescriptor;
     STEntry * next;
@@ -39,9 +39,9 @@ struct STEntry {
     // char charVal;
     // bool boolVal;
     STEntry() {};
-    STEntry(STEntryType entryType, int level)
+    STEntry(STEntryType entryType, int scopeId)
     : entryType (entryType),
-    level (level) {
+    scopeId (scopeId) {
     };
 }; 
 
@@ -52,7 +52,7 @@ class SymbolTable {
 
         STEntry * universe;
         STEntry * currentScope;
-        int currentLevel;
+        int currentScopeId;
 
         STTypeDescriptor * intDescriptor;
         STTypeDescriptor * charDescriptor;
