@@ -6,7 +6,7 @@
 #include <sstream>
 
 static std::map<TokenType, std::string> tokenToStrMap = {
-    { T_EQUALS, "EQUALS" },
+    { T_ASSIGN, "ASSIGN" },
     { T_PLUS, "PLUS" },
     { T_MINUS, "MINUS" },
     { T_SEMI, "SEMI" },
@@ -24,6 +24,14 @@ static std::map<TokenType, std::string> tokenToStrMap = {
     { T_CHARVALUE, "CHARVALUE"},
     { T_LSQUARE, "LSQUARE"},
     { T_RSQUARE, "RSQUARE"},
+    { T_AND, "AND" },
+    { T_OR, "OR" },
+    { T_LESSEQUAL, "LESSEQUAL"},
+    { T_GREATEREQUAL, "GREATEREQUAL" },
+    { T_LESSTHAN, "LESSTHAN" },
+    { T_GREATERTHAN, "GREATERTHAN" },
+    { T_WHILE, "WHILE" },
+    { T_FOR, "FOR" },
 };
 
 static std::string tokenToStr(Token t) {

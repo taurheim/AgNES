@@ -4,7 +4,8 @@
 
 IRGenerator::IRGenerator(ASTNode * annotatedRoot) {
     root = annotatedRoot;
-    tempIdCount = 0;
+    registerCount = 0;
+    labelCount = 0;
 }
 
 void IRGenerator::generate() {
@@ -19,6 +20,11 @@ void IRGenerator::genTAC(ASTNode * node) {
                 genTACExpression(node);
                 break;
             }
+        case AST_STATEMENT:
+            {
+                genTACStatement(node);
+                break;
+            }
         default:
             {
                 for(auto child : node->children) {
@@ -26,8 +32,40 @@ void IRGenerator::genTAC(ASTNode * node) {
                 }
             }
     }
+}
 
- 
+void IRGenerator::genTACStatement(ASTNode * node) {
+    StatementNode * statementNode = (StatementNode *)node;
+    switch(statementNode->type) {
+        case (STMT_WHILE): {
+            std::string labelBefore = genLabel();
+            std::string labelAfter = genLabel();
+            intermediateCode.push_back({ IR_NEWLABEL, labelBefore});
+            std::string condition = genTACExpression(node->children[0]);
+            intermediateCode.push_back({ IR_IFFALSEGOTO, condition, labelAfter });
+            genTACStatement(node->children[1]);
+            intermediateCode.push_back({ IR_GOTO, labelBefore });
+            intermediateCode.push_back({ IR_NEWLABEL, labelAfter });
+            break;
+        }
+        case (STMT_BLOCK): {
+            for (auto & child : statementNode->children) {
+                genTACStatement(child);
+            }
+            break;
+        }
+        case (STMT_ASSIGN): {
+            ASTNode * assignmentNode = node->children[0];
+            IdentifierNode * assignTo = (IdentifierNode*) assignmentNode->children[0];
+            std::string tempRegister = genTACExpression(assignmentNode->children[1]);
+            // TODO scope
+            intermediateCode.push_back({ IR_ASSIGN, assignTo->name, tempRegister});
+            break;
+        }
+        default: {
+            return;
+        }
+    }
 }
 
 std::string IRGenerator::genTACExpression(ASTNode * expr) {
@@ -36,33 +74,41 @@ std::string IRGenerator::genTACExpression(ASTNode * expr) {
         ASTNode * onlyChild = expr->children[0];
         if(onlyChild->nodeType == AST_NUMBER) {
             // Case 1: cgen(k) where k is a constant
-            code.adr1 = std::to_string(((NumberNode *)onlyChild)->value);
             code.op = IR_ASSIGN;
-            code.result = genAddress();
+            code.first = genAddress();
+            code.second = std::to_string(((NumberNode *)onlyChild)->value);
             intermediateCode.push_back(code);
         } else if (onlyChild->nodeType == AST_IDENTIFIER) {
             // Case 2: cgen(id) where id is an identifier
-            code.adr1 = ((IdentifierNode *)onlyChild)->name;
             code.op = IR_ASSIGN;
-            code.result = genAddress();
+            code.first = genAddress();
+            code.second = ((IdentifierNode *)onlyChild)->name;
             intermediateCode.push_back(code);
         }
     } else {
         ASTNode * secondChild = expr->children[1];
         //Check if binary op
         if (secondChild->nodeType == AST_OPERATOR) {
-            code.adr1 = genTACExpression(expr->children[0]);
-            code.adr2 = genTACExpression(expr->children[2]);
+            code.second = genTACExpression(expr->children[0]);
+            code.third = genTACExpression(expr->children[2]);
             OpNode * opNode = (OpNode *)expr->children[1];
             code.op = opStringToEnum[opNode->operation];
-            code.result = genAddress();
+            code.first = genAddress();
             intermediateCode.push_back(code);
         }
         //Could be unary op, function, etc..
     }
-    return code.result;
+    return code.first;
 }
 
 std::string IRGenerator::genAddress() {
-    return "_t" + std::to_string(tempIdCount++);
+    return "_t" + std::to_string(registerCount++);
+}
+
+std::string IRGenerator::genLabel() {
+    // if (labelCounts.find(nodeType) == labelCounts.end()) {
+    //     labelCounts[nodeType] = 0;
+    // }
+    // return "_" + nodeType + std::to_string(labelCounts[nodeType]++);
+    return "LABEL" + std::to_string(labelCount++);
 }

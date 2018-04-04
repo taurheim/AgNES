@@ -2,7 +2,7 @@
 #include <string>
 
 enum TokenType {
-    T_EQUALS,
+    T_ASSIGN,
     T_PLUS,
     T_MINUS,
     T_SEMI,
@@ -20,6 +20,18 @@ enum TokenType {
     T_INTVALUE,
     T_CHAR,
     T_CHARVALUE,
+    T_WHILE,
+    T_IF,
+    T_ELSE,
+    T_FOR,
+    T_VOID,
+    T_LESSTHAN,
+    T_GREATERTHAN,
+    T_NOTEQUAL,
+    T_LESSEQUAL,
+    T_GREATEREQUAL,
+    T_AND,
+    T_OR,
 };
 
 struct Token {
@@ -27,4 +39,9 @@ struct Token {
     std::string stringVal;
     int intVal;
     char charVal;
+
+    Token(){};
+    Token(TokenType type) :
+    type (type) {
+    }
 };

@@ -237,8 +237,26 @@ ASTNode * Parser::statement() {
     StatementNode * node = new StatementNode();
 
     switch(t.type) {
+        case T_WHILE: {
+            node->type = STMT_WHILE;
+            next();
+            expect(T_LPAREN);
+            node->children.push_back(expression());
+            expect(T_RPAREN);
+            node->children.push_back(statement());
+            break;
+        }
+        case T_LCURLY: {
+            node->type = STMT_BLOCK;
+            next();
+            while (t.type != T_RCURLY) {
+                node->children.push_back(statement());
+            }
+            expect(T_RCURLY);
+            break;
+        }
         case T_RETURN: {
-            node->type = "return";
+            node->type = STMT_RETURN;
             next();
             if (t.type != T_SEMI) {
                 node->children.push_back(expression());
@@ -247,7 +265,7 @@ ASTNode * Parser::statement() {
             break;
         }
         case T_SEMI: {
-            node->type = "empty";
+            node->type = STMT_EMPTY;
             next();
             break;
         }
@@ -258,7 +276,7 @@ ASTNode * Parser::statement() {
             TokenType decider = lookahead(1);
             if (decider == T_LPAREN) {
                 // Function call
-                node->type = "functioncall";
+                node->type = STMT_FUNCTIONCALL;
                 node->children.push_back(identifier());
                 expect(T_LPAREN);
 
@@ -277,7 +295,7 @@ ASTNode * Parser::statement() {
                 expect(T_SEMI);
             } else {
                 // Assignment
-                node->type = "assignment";
+                node->type = STMT_ASSIGN;
                 node->children.push_back(assignment());
             }
             break;
@@ -306,7 +324,7 @@ ASTNode * Parser::assignment() {
         expect(T_RSQUARE);
     }
 
-    expect(T_EQUALS);
+    expect(T_ASSIGN);
     node->children.push_back(expression());
     expect(T_SEMI);
 

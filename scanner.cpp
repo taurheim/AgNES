@@ -55,14 +55,43 @@ Token Scanner::identifyKeyword() {
 }
 
 Token Scanner::identifySpecialToken() {
-    auto search = charToToken.find(ch);
+    char firstChar = ch;
+    getChar();
+    switch (firstChar) {
+        case '<': {
+            if (ch == '=') {
+                getChar();
+                return Token(T_LESSEQUAL);
+            }
+        }
+        case '>': {
+            if (ch == '=') {
+                getChar();
+                return Token(T_GREATEREQUAL);
+            }
+        }
+        case '&': {
+            if (ch == '&') {
+                getChar();
+                return Token(T_AND);
+            }
+        }
+        case '|' : {
+            if (ch == '|') {
+                getChar();
+                return Token(T_OR);
+            }
+        }
+        default: {
+           break;
+        }
+    }
+    auto search = charToToken.find(firstChar);
     if (search == charToToken.end()) {
         std::cerr << "Invalid character!";
         exit(1);
-    } else {
-        getChar();
-        return { search->second };
-    }
+    } 
+    return { search->second };
 }
 
 Token Scanner::identifyNumber() {

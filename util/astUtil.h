@@ -22,6 +22,17 @@ static std::map<ASTNodeType, std::string> nodeTypeToString = {
     {AST_CHAR, "CHAR"},
 };
 
+static std::map<StatementType, std::string> statementTypeToString = {
+    {STMT_WHILE, "WHILE"},
+    {STMT_FOR, "FOR"},
+    {STMT_IF, "IF"},
+    {STMT_RETURN, "RETURN"},
+    {STMT_ASSIGN, "ASSIGN"},
+    {STMT_FUNCTIONCALL, "FUNCTIONCALL"},
+    {STMT_BLOCK, "BLOCK"},
+    {STMT_EMPTY, "EMPTY"},
+};
+
 static void printNode(std::string indent, bool last, ASTNode * node) {
     std::string nodeString;
     switch(node->nodeType) {
@@ -51,7 +62,7 @@ static void printNode(std::string indent, bool last, ASTNode * node) {
         case AST_STATEMENT: {
             StatementNode * statement = static_cast<StatementNode*>(node);
             nodeString = "Statement (type: ";
-            nodeString.append(statement->type);
+            nodeString.append(statementTypeToString[statement->type]);
             nodeString.append(")");
             break;
         }

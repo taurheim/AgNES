@@ -25,6 +25,17 @@ enum ASTNodeType {
     AST_CHAR,
 };
 
+enum StatementType {
+    STMT_WHILE,
+    STMT_FOR,
+    STMT_IF,
+    STMT_RETURN,
+    STMT_ASSIGN,
+    STMT_FUNCTIONCALL,
+    STMT_BLOCK,
+    STMT_EMPTY,
+};
+
 struct ASTNode {
     explicit ASTNode(ASTNodeType type) {
         nodeType = type;
@@ -66,7 +77,7 @@ struct OpNode : ASTNode {
 struct StatementNode : ASTNode {
     StatementNode() : ASTNode(AST_STATEMENT) {
     }
-    std::string type;
+    StatementType type;
 };
 
 /*
