@@ -180,8 +180,13 @@ ASTNode * Parser::variableDeclaration() {
     ASTNode * node = new ASTNode(AST_VARDECLARATION);
 
     node->children.push_back(identifier());
-    
-    // TODO array
+
+    // Check if its an array
+    if(t.type == LSQUARE) {
+        expect(LSQUARE);
+        node->children.push_back(number());
+        expect(RSQUARE);
+    }
 
     return node;
 }
@@ -280,17 +285,33 @@ ASTNode * Parser::statement() {
 
 ASTNode * Parser::assignment() {
     /*
-        <identifier> ["[" <expression> "]"] "=" <expression>
+        <identifier> ["[" <arrayIndex> "]"] "=" <expression>
     */
     ASTNode * node = new ASTNode(AST_ASSIGNMENT);
 
     node->children.push_back(identifier());
 
-    // TODO handle array
+    // Check if its an array
+    if (t.type == LSQUARE) {
+        expect(LSQUARE);
+        node->children.push_back(arrayIndex());
+        expect(RSQUARE);
+    }
 
     expect(EQUALS);
     node->children.push_back(expression());
     expect(SEMI);
+
+    return node;
+}
+
+ASTNode * Parser::arrayIndex() {
+    /*
+        <expression>
+    */
+    ASTNode * node = new ASTNode(AST_ARRAYINDEX);
+
+    node->children.push_back(expression());
 
     return node;
 }

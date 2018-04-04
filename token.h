@@ -17,6 +17,8 @@ enum TokenType {
     COMMA,
     EOF_TOKEN,
     CHAR,
+    LSQUARE,
+    RSQUARE,
 };
 
 struct Token {

@@ -21,6 +21,7 @@ enum ASTNodeType {
     AST_KEYWORD,
     AST_VARDECLARATION,
     AST_FUNCTIONBODY,
+    AST_ARRAYINDEX,
 };
 
 struct ASTNode {
