@@ -2,9 +2,7 @@ int x, y;
 char c;
 
 int setxto(int to, int from) {
-    c = 'a';
-    x = to;
-    return x;
+    y = 5 + x;
 }
 
 int z;

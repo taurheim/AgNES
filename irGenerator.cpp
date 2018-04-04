@@ -21,12 +21,13 @@ void IRGenerator::genTAC(ASTNode * node) {
             }
         default:
             {
+                for(auto child : node->children) {
+                    genTAC(child);
+                }
             }
     }
 
-    for(auto child : node->children) {
-        genTAC(child);
-    }
+ 
 }
 
 std::string IRGenerator::genTACExpression(ASTNode * expr) {
@@ -57,7 +58,7 @@ std::string IRGenerator::genTACExpression(ASTNode * expr) {
             code.result = genAddress();
             intermediateCode.push_back(code);
         }
-        //Could be unary op, function, etc...
+        //Could be unary op, function, etc..
     }
     return code.result;
 }

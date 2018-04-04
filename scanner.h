@@ -25,4 +25,6 @@ class Scanner {
         Token identifyNumber();
         Token identifyChar();
 
+        void reject(std::string str);
+
 };

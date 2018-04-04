@@ -81,8 +81,7 @@ Token Scanner::identifyNumber() {
 
 Token Scanner::identifyChar() {
     if(ch != '\'') {
-        std::cerr << "Char must begin with \"'\"";
-        exit(1);
+        reject("Char must begin with \"'\"");
     }
 
     getChar();
@@ -92,8 +91,7 @@ Token Scanner::identifyChar() {
     getChar();
 
     if(ch != '\'') {
-        std::cerr << "Char can only be of length 1, expected \"'\"";
-        exit(1);
+        reject("Char can only be of length 1, expected \"'\"");
     }
     getChar();
 
@@ -101,6 +99,7 @@ Token Scanner::identifyChar() {
 }
 
 std::list<Token> Scanner::scan() {
+    std::cout << "Scanning...\n";
     getChar();
 
     std::list<Token> tokenList;
@@ -120,4 +119,9 @@ std::list<Token> Scanner::scan() {
     }
 
     return tokenList;
+}
+
+void Scanner::reject(std::string str) {
+    std::cerr << std::endl << str << std::endl;
+    exit(1);
 }
