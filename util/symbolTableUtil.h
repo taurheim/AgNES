@@ -1,6 +1,7 @@
 #include <map>
 #include <iostream>
 #include "../symbolTable.h"
+#include "../varType.h"
 
 static std::map<STEntryType, std::string> stEntryTypeToString = {
     {ST_HEAD, "HEAD"},
@@ -30,7 +31,15 @@ static void printEntry(std::string indent, bool last, STEntry * entry) {
     STEntry * currentEntry = entry->next;
 
     while(currentEntry != nullptr) {
-        std::cout << " --> (" << stEntryTypeToString[currentEntry->entryType] << " " << currentEntry->name << ")";
+        std::cout << " --> (" << stEntryTypeToString[currentEntry->entryType];
+
+        if (currentEntry->typeDescriptor != nullptr) {
+            STTypeDescriptor * td = currentEntry->typeDescriptor;
+            
+            std::cout << ":" << varTypeToString[td->type];
+        }
+        
+        std::cout << " " << currentEntry->name << ")";
         currentEntry = currentEntry->next;
     }
 

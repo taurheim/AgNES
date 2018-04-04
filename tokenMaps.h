@@ -4,19 +4,19 @@
 #include "token.h"
 
 static std::map<char, TokenType> charToToken = {
-    {'=', TokenType::EQUALS},
-    {'+', TokenType::PLUS},
-    {'-', TokenType::MINUS},
-    {';', TokenType::SEMI},
-    {'(', TokenType::LPAREN},
-    {')', TokenType::RPAREN},
-    {'{', TokenType::LCURLY},
-    {'}', TokenType::RCURLY},
-    {',', TokenType::COMMA},
+    {'=', TokenType::T_EQUALS},
+    {'+', TokenType::T_PLUS},
+    {'-', TokenType::T_MINUS},
+    {';', TokenType::T_SEMI},
+    {'(', TokenType::T_LPAREN},
+    {')', TokenType::T_RPAREN},
+    {'{', TokenType::T_LCURLY},
+    {'}', TokenType::T_RCURLY},
+    {',', TokenType::T_COMMA},
 };
 
 static std::map<std::string, TokenType> stringToToken = {
-    {"int", TokenType::INT},
-    {"return", TokenType::RETURN},
-    {"char", TokenType::CHAR},
+    {"int", TokenType::T_INT},
+    {"return", TokenType::T_RETURN},
+    {"char", TokenType::T_CHAR},
 };

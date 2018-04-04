@@ -18,7 +18,7 @@ ASTNode * Parser::parse() {
 }
 
 void Parser::next() {
-    if (t.type == EOF_TOKEN) {
+    if (t.type == T_EOF_TOKEN) {
         reject("Unexpected EOF");
         return;
     }
@@ -40,16 +40,16 @@ ASTNode * Parser::program() {
 
     ASTNode * node = new ASTNode(AST_PROGRAM);
 
-    while (t.type != EOF_TOKEN) {
+    while (t.type != T_EOF_TOKEN) {
         TokenType decider = lookahead(2);
 
         ASTNode * childNode;
 
-        if(decider == LPAREN) {
+        if(decider == T_LPAREN) {
             childNode = function();
         } else {
             childNode = declaration();
-            expect(SEMI);
+            expect(T_SEMI);
         }
 
         node->children.push_back(childNode);
@@ -77,14 +77,14 @@ ASTNode * Parser::functionBody() {
         "{" { <statement> } "}
     */
     ASTNode * node = new ASTNode(AST_FUNCTIONBODY);
-    expect(LCURLY);
+    expect(T_LCURLY);
 
     // 0 or more statements
-    while (t.type != RCURLY) {
+    while (t.type != T_RCURLY) {
         node->children.push_back(statement());
     }
     
-    expect(RCURLY);
+    expect(T_RCURLY);
 
     return node;
 }
@@ -95,21 +95,21 @@ ASTNode * Parser::parameterList() {
     */
     ASTNode * node = new ASTNode(AST_PARAMETERLIST);
 
-    expect(LPAREN);
+    expect(T_LPAREN);
 
-    if(t.type != RPAREN) {
+    if(t.type != T_RPAREN) {
         // We have one or more parameters
         node->children.push_back(parameter());
 
         // Consume the rest of the params
-        while(t.type == COMMA) {
-            expect(COMMA);
+        while(t.type == T_COMMA) {
+            expect(T_COMMA);
             node->children.push_back(parameter());
         }
     }
 
     
-    expect(RPAREN);
+    expect(T_RPAREN);
 
     return node;
 }
@@ -130,7 +130,7 @@ ASTNode * Parser::identifier() {
     /*
         Terminal
     */
-    if (t.type != TokenType::IDENT) {
+    if (t.type != TokenType::T_IDENT) {
         reject("Expected identifier");
     }
 
@@ -145,12 +145,20 @@ ASTNode * Parser::type() {
     /*
         Terminal
     */
-    if (t.type != TokenType::INT) {
-        reject("Type not recognized");
-    }
-
     TypeNode * node = new TypeNode();
-    node->varType = VT_INT;
+    switch(t.type) {
+        case T_INT: {
+            node->varType = VT_INT;
+            break;
+        }
+        case T_CHAR: {
+            node->varType = VT_CHAR;
+            break;
+        }
+        default: {
+            reject("Type not recognized");
+        }
+    }
 
     next();
     return node;
@@ -166,7 +174,7 @@ ASTNode * Parser::declaration() {
     node->children.push_back(type());
     node->children.push_back(variableDeclaration());
 
-    while (t.type == COMMA) {
+    while (t.type == T_COMMA) {
         next();
         node->children.push_back(variableDeclaration());
     }
@@ -182,17 +190,17 @@ ASTNode * Parser::variableDeclaration() {
     node->children.push_back(identifier());
 
     // Check if its an array
-    if(t.type == LSQUARE) {
-        expect(LSQUARE);
+    if(t.type == T_LSQUARE) {
+        expect(T_LSQUARE);
         node->children.push_back(number());
-        expect(RSQUARE);
+        expect(T_RSQUARE);
     }
 
     return node;
 }
 
 void Parser::reject(std::string const & str) {
-    std::cout << "[FUCK YOU] " << str << " { Got: " << tokenToStr(t) << " }" << std::endl;
+    std::cout << "\n[FUCK YOU] " << str << " { Got: " << tokenToStr(t) << " }" << std::endl;
 
     exit(1);
 }
@@ -229,44 +237,44 @@ ASTNode * Parser::statement() {
     StatementNode * node = new StatementNode();
 
     switch(t.type) {
-        case RETURN: {
+        case T_RETURN: {
             node->type = "return";
             next();
-            if (t.type != SEMI) {
+            if (t.type != T_SEMI) {
                 node->children.push_back(expression());
             }
-            expect(SEMI);
+            expect(T_SEMI);
             break;
         }
-        case SEMI: {
+        case T_SEMI: {
             node->type = "empty";
             next();
             break;
         }
-        case IDENT:
+        case T_IDENT:
         {
             // Can be either an assignment or a function call
             // Check second character - if it's a "(" then it's a function call
             TokenType decider = lookahead(1);
-            if (decider == LPAREN) {
+            if (decider == T_LPAREN) {
                 // Function call
                 node->type = "functioncall";
                 node->children.push_back(identifier());
-                expect(LPAREN);
+                expect(T_LPAREN);
 
                 // First arg
-                if(t.type != RPAREN) {
+                if(t.type != T_RPAREN) {
                     node->children.push_back(expression());
                 }
 
                 // 2.. args
-                while (t.type != RPAREN) {
-                    expect(COMMA);
+                while (t.type != T_RPAREN) {
+                    expect(T_COMMA);
                     node->children.push_back(expression());
                 }
 
-                expect(RPAREN);
-                expect(SEMI);
+                expect(T_RPAREN);
+                expect(T_SEMI);
             } else {
                 // Assignment
                 node->type = "assignment";
@@ -292,15 +300,15 @@ ASTNode * Parser::assignment() {
     node->children.push_back(identifier());
 
     // Check if its an array
-    if (t.type == LSQUARE) {
-        expect(LSQUARE);
+    if (t.type == T_LSQUARE) {
+        expect(T_LSQUARE);
         node->children.push_back(arrayIndex());
-        expect(RSQUARE);
+        expect(T_RSQUARE);
     }
 
-    expect(EQUALS);
+    expect(T_EQUALS);
     node->children.push_back(expression());
-    expect(SEMI);
+    expect(T_SEMI);
 
     return node;
 }
@@ -327,7 +335,7 @@ ASTNode * Parser::expression() {
         | "!" <expression>
         | "(" <expression> ")"
         | <number>
-        | <char>
+        | <character>
         | <string>
         | <identifier> "(" [ <expression> { "," <expression> }] ")" 
         | <identifier>  "[" <expression> "]"
@@ -337,9 +345,9 @@ ASTNode * Parser::expression() {
     ASTNode * node = new ASTNode(AST_EXPRESSION);
 
     switch(t.type) {
-        case NUM: {
+        case T_INTVALUE: {
             ASTNode * numberNode = number();
-            if (t.type == PLUS || t.type == MINUS) {
+            if (t.type == T_PLUS || t.type == T_MINUS) {
                 ASTNode * expressionNode = new ASTNode(AST_EXPRESSION);
                 expressionNode->children.push_back(numberNode);
                 node->children.push_back(expressionNode);
@@ -348,9 +356,14 @@ ASTNode * Parser::expression() {
             }
             break;
         }
-        case IDENT: {
+        case T_CHARVALUE: {
+            ASTNode * charNode = character();
+            node->children.push_back(charNode);
+            break;
+        }
+        case T_IDENT: {
             ASTNode * identNode = identifier();
-            if (t.type == PLUS || t.type == MINUS) {
+            if (t.type == T_PLUS || t.type == T_MINUS) {
                 ASTNode * expressionNode = new ASTNode(AST_EXPRESSION);
                 expressionNode->children.push_back(identNode);
                 node->children.push_back(expressionNode);
@@ -359,21 +372,21 @@ ASTNode * Parser::expression() {
             }
             break;
         }
-        case LPAREN: {
-            expect(LPAREN);
+        case T_LPAREN: {
+            expect(T_LPAREN);
             node->children.push_back(expression());
-            expect(RPAREN);
+            expect(T_RPAREN);
             break;
         }
         default: {
-            reject("Expression expected IDENT or NUM");
+            reject("Expression expected T_IDENT or T_INTVALUE");
         }
     }
 
-    if(t.type == PLUS || t.type == MINUS) {
+    if(t.type == T_PLUS || t.type == T_MINUS) {
         node->children.push_back(op());
         node->children.push_back(expression());
-    } else if (t.type == LPAREN) {
+    } else if (t.type == T_LPAREN) {
         // Function call
     }
 
@@ -388,7 +401,7 @@ ASTNode * Parser::op() {
     OpNode * node = new OpNode();
 
     switch(t.type) {
-        case PLUS: {
+        case T_PLUS: {
             node->operation = "+";
             break;
         }
@@ -408,6 +421,17 @@ ASTNode * Parser::number() {
     NumberNode * node = new NumberNode();
     node->value = t.intVal;
 
-    expect(NUM);
+    expect(T_INTVALUE);
     return node;
+}
+
+ASTNode * Parser::character() {
+    /*
+        Terminal
+    */
+   CharNode * node = new CharNode();
+   node->value = t.charVal;
+   
+   expect(T_CHARVALUE);
+   return node;
 }

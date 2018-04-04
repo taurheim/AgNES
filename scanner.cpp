@@ -30,7 +30,7 @@ Token Scanner::getNextToken() {
         // Char
         sym = identifyChar();
     } else if (input.eof()) {
-        sym = { EOF_TOKEN };
+        sym = { T_EOF_TOKEN };
     } else {
         sym = identifySpecialToken();
     }
@@ -46,7 +46,7 @@ Token Scanner::identifyKeyword() {
     auto search = stringToToken.find(word);
     if (search == stringToToken.end()) {
         Token identToken;
-        identToken.type = TokenType::IDENT;
+        identToken.type = TokenType::T_IDENT;
         identToken.stringVal = word;
         return identToken;
     } else {
@@ -67,7 +67,7 @@ Token Scanner::identifySpecialToken() {
 
 Token Scanner::identifyNumber() {
     Token numberToken;
-    numberToken.type = TokenType::NUM;
+    numberToken.type = TokenType::T_INTVALUE;
     numberToken.intVal = 0;
 
     // Go through all the digits to get the full number
@@ -87,7 +87,7 @@ Token Scanner::identifyChar() {
 
     getChar();
     Token charToken;
-    charToken.type = TokenType::CHAR;
+    charToken.type = TokenType::T_CHARVALUE;
     charToken.charVal = ch;
     getChar();
 
@@ -96,6 +96,8 @@ Token Scanner::identifyChar() {
         exit(1);
     }
     getChar();
+
+    return charToken;
 }
 
 std::list<Token> Scanner::scan() {
@@ -106,7 +108,7 @@ std::list<Token> Scanner::scan() {
         Token t = getNextToken();
         tokenList.push_back(t);
 
-        if (t.type == EOF_TOKEN) break;
+        if (t.type == T_EOF_TOKEN) break;
     }
 
     if (debug) {

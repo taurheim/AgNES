@@ -6,20 +6,24 @@
 #include <sstream>
 
 static std::map<TokenType, std::string> tokenToStrMap = {
-    { EQUALS, "EQUALS" },
-    { PLUS, "PLUS" },
-    { MINUS, "MINUS" },
-    { SEMI, "SEMI" },
-    { LPAREN, "LPAREN" },
-    { RPAREN, "RPAREN" },
-    { LCURLY, "LCURLY" },
-    { RCURLY, "RCURLY" },
-    { INT, "INT" },
-    { RETURN, "RETURN" },
-    { IDENT, "IDENT" },
-    { NUM, "NUM" },
-    { COMMA, "COMMA" },
-    { EOF_TOKEN, "EOF" },
+    { T_EQUALS, "EQUALS" },
+    { T_PLUS, "PLUS" },
+    { T_MINUS, "MINUS" },
+    { T_SEMI, "SEMI" },
+    { T_LPAREN, "LPAREN" },
+    { T_RPAREN, "RPAREN" },
+    { T_LCURLY, "LCURLY" },
+    { T_RCURLY, "RCURLY" },
+    { T_INT, "INT" },
+    { T_RETURN, "RETURN" },
+    { T_IDENT, "IDENT" },
+    { T_INTVALUE, "INTVALUE" },
+    { T_COMMA, "COMMA" },
+    { T_EOF_TOKEN, "EOF" },
+    { T_CHAR, "CHAR"},
+    { T_CHARVALUE, "CHARVALUE"},
+    { T_LSQUARE, "LSQUARE"},
+    { T_RSQUARE, "RSQUARE"},
 };
 
 static std::string tokenToStr(Token t) {
@@ -30,10 +34,10 @@ static std::string tokenToStr(Token t) {
         std::stringstream outputString;
         outputString << search->second;
         switch(t.type) {
-            case NUM:
+            case T_INTVALUE:
                 outputString << "(" << t.intVal << ")";
                 break;
-            case IDENT:
+            case T_IDENT:
                 outputString << "(" << t.stringVal << ")";
                 break;
         }

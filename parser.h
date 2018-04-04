@@ -40,4 +40,5 @@ class Parser {
         ASTNode * identifier();
         ASTNode * op();
         ASTNode * number(); // Number token
+        ASTNode * character();
 };

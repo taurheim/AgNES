@@ -22,6 +22,7 @@ enum ASTNodeType {
     AST_VARDECLARATION,
     AST_FUNCTIONBODY,
     AST_ARRAYINDEX,
+    AST_CHAR,
 };
 
 struct ASTNode {
@@ -48,6 +49,12 @@ struct NumberNode : ASTNode {
     NumberNode() : ASTNode(AST_NUMBER) {
     }
     int value;
+};
+
+struct CharNode : ASTNode {
+    CharNode() : ASTNode(AST_CHAR) {
+    }
+    char value;
 };
 
 struct OpNode : ASTNode {

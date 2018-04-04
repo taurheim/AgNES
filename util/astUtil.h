@@ -19,10 +19,7 @@ static std::map<ASTNodeType, std::string> nodeTypeToString = {
     {AST_OPERATOR, "OPERATOR"},
     {AST_VARDECLARATION, "VARDECLARATION"},
     {AST_FUNCTIONBODY, "FUNCTIONBODY"},
-};
-
-static std::map<VarType, std::string> varTypeToString = {
-    {VT_INT, "int"}
+    {AST_CHAR, "CHAR"},
 };
 
 static void printNode(std::string indent, bool last, ASTNode * node) {
@@ -41,7 +38,7 @@ static void printNode(std::string indent, bool last, ASTNode * node) {
             if (search != varTypeToString.end()) {
                 nodeString.append(search->second);
             } else {
-                nodeString.append("NOTFOUND");
+                nodeString.append("ASTUTIL::TYPE_NOT_FOUND");
             }
             break;
         }
@@ -62,6 +59,12 @@ static void printNode(std::string indent, bool last, ASTNode * node) {
             NumberNode * number = static_cast<NumberNode*>(node);
             nodeString = "Number: ";
             nodeString.append(std::to_string(number->value));
+            break;
+        }
+        case AST_CHAR: {
+            CharNode * charNode = static_cast<CharNode*>(node);
+            nodeString = "Char: ";
+            nodeString.append(std::string(1,charNode->value));
             break;
         }
         default: {

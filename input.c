@@ -1,8 +1,10 @@
 int x, y;
+char c;
 
 int setxto(int to, int from) {
-     x = to;
-     return x;
+    c = 'a';
+    x = to;
+    return x;
 }
 
 int z;
