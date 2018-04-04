@@ -30,7 +30,6 @@ void IRGenerator::genTAC(ASTNode * node) {
 }
 
 std::string IRGenerator::genTACExpression(ASTNode * expr) {
-    std::cout << "Generating expression" << std::endl;
     TAC code = TAC();
     if (expr->children.size() == 1) {
         ASTNode * onlyChild = expr->children[0];

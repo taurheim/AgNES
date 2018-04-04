@@ -10,7 +10,9 @@ Parser::Parser(std::list<Token> & tokens) : tokens (tokens) {
 }
 
 ASTNode * Parser::parse() {
+    std::cout << "Parsing..." << std::endl;
     root = program();
+    std::cout << std::endl;
     printAST(root);
     return root;
 }
@@ -23,7 +25,7 @@ void Parser::next() {
     std::advance(tokenIterator, 1);
     t = *tokenIterator;
 
-    std::cout << tokenToStr(t) << std::endl;
+    std::cout << tokenToStr(t) << " ";
 }
 
 ASTNode * Parser::program() {
