@@ -16,10 +16,12 @@ enum TokenType {
     NUM,
     COMMA,
     EOF_TOKEN,
+    CHAR,
 };
 
 struct Token {
     TokenType type;
     std::string stringVal;
     int intVal;
+    char charVal;
 };

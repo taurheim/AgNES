@@ -21,7 +21,8 @@ class Scanner {
         void getChar();
         Token getNextToken();
         Token identifyKeyword();
-        Token identifyChar();
+        Token identifySpecialToken();
         Token identifyNumber();
+        Token identifyChar();
 
 };

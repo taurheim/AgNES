@@ -1,5 +1,6 @@
 #include <cctype>
 #include <string.h>
+#include <stdexcept>
 #include "scanner.h"
 #include "tokenMaps.h"
 #include "util/tokenUtil.h"
@@ -19,10 +20,20 @@ void Scanner::getChar() {
 Token Scanner::getNextToken() {
     Token sym;
     while (std::isspace(ch) && !input.eof()) getChar(); // skip to next non-whitespace character
-    if (std::isalpha(ch)) sym = identifyKeyword();
-    else if (std::isdigit(ch)) sym = identifyNumber();
-    else if (input.eof()) sym = { EOF_TOKEN };
-    else sym = identifyChar();
+    if (std::isalpha(ch)) {
+        // Identifier
+        sym = identifyKeyword();
+    } else if (std::isdigit(ch)) {
+        // Number
+        sym = identifyNumber();  
+    } else if (ch == '\'') {
+        // Char
+        sym = identifyChar();
+    } else if (input.eof()) {
+        sym = { EOF_TOKEN };
+    } else {
+        sym = identifySpecialToken();
+    }
     return sym;
 }
 
@@ -43,7 +54,7 @@ Token Scanner::identifyKeyword() {
     }
 }
 
-Token Scanner::identifyChar() {
+Token Scanner::identifySpecialToken() {
     auto search = charToToken.find(ch);
     if (search == charToToken.end()) {
         std::cerr << "Invalid character!";
@@ -66,6 +77,25 @@ Token Scanner::identifyNumber() {
     }
 
     return numberToken;
+}
+
+Token Scanner::identifyChar() {
+    if(ch != '\'') {
+        std::cerr << "Char must begin with \"'\"";
+        exit(1);
+    }
+
+    getChar();
+    Token charToken;
+    charToken.type = TokenType::CHAR;
+    charToken.charVal = ch;
+    getChar();
+
+    if(ch != '\'') {
+        std::cerr << "Char can only be of length 1, expected \"'\"";
+        exit(1);
+    }
+    getChar();
 }
 
 std::list<Token> Scanner::scan() {

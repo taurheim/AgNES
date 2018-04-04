@@ -73,6 +73,9 @@ ASTNode * Parser::function() {
 }
 
 ASTNode * Parser::functionBody() {
+    /*
+        "{" { <statement> } "}
+    */
     ASTNode * node = new ASTNode(AST_FUNCTIONBODY);
     expect(LCURLY);
 
@@ -155,7 +158,8 @@ ASTNode * Parser::type() {
 
 ASTNode * Parser::declaration() {
     /*
-        TODO full coverage
+        This could be extended to include forward declarations of functions. 
+        For now, we only support forward declarations of variables.
         <type> <variableDeclaration> { "," variableDeclaration }
     */
     ASTNode * node = new ASTNode(AST_DECLARATION);

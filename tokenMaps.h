@@ -17,5 +17,6 @@ static std::map<char, TokenType> charToToken = {
 
 static std::map<std::string, TokenType> stringToToken = {
     {"int", TokenType::INT},
-    {"return", TokenType::RETURN}
+    {"return", TokenType::RETURN},
+    {"char", TokenType::CHAR},
 };
