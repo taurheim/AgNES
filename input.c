@@ -1,8 +1,14 @@
 int x, y;
 
+int test(int x, int z) {
+
+}
+
 int main() {
-    while (1){
-        x = x + 5;
+    if (1){
+        test(5,7);
+    } else {
+        y = 7;
     }
 }
 

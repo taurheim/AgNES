@@ -246,6 +246,19 @@ ASTNode * Parser::statement() {
             node->children.push_back(statement());
             break;
         }
+        case T_IF: {
+            node->type = STMT_IF;
+            next();
+            expect(T_LPAREN);
+            node->children.push_back(expression());
+            expect(T_RPAREN);
+            node->children.push_back(statement());
+            if (t.type == T_ELSE) {
+                next();
+                node->children.push_back(statement());
+            }
+            break;
+        }
         case T_LCURLY: {
             node->type = STMT_BLOCK;
             next();

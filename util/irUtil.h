@@ -31,11 +31,36 @@ static void printIRCode(std::list<TAC> code) {
                 std::cout << "\t" << "IfNot " << i.first << " goto " << i.second;
                 break;
             }
+            case IR_BEGINFUNC: {
+                std::cout << "\t" << "BeginFunc " << i.first;
+                break;
+            }
+            case IR_ENDFUNC: {
+                std::cout << "\t" << "EndFunc";
+                break;
+            }
             case IR_NEWLABEL: {
                 std::cout << i.first << ":";
                 break;
             }
+            case IR_CALL: {
+                std::cout << "\t" << "Call " << i.first;
+                break;
+            }
+            case IR_PUSHPARAM: {
+                std::cout << "\t" << "PushParam " << i.first;
+                break;
+            }
+            case IR_POPPARAMS: {
+                std::cout << "\t" << "PopParams " << i.first;
+                break;
+            }
+            case IR_DECLARATION: {
+                std::cout << "\t" << "Allocate " << i.second << " " << i.first;
+                break;
+            }
             default: {
+                std::cout << "\t" << "<IR NOT SUPPORTED BY irUtil>";
                 break;
             }
         }

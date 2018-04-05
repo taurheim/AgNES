@@ -12,6 +12,12 @@ enum IR_OPERATION {
     IR_GOTO,
     IR_IFTRUEGOTO,
     IR_IFFALSEGOTO,
+    IR_BEGINFUNC,
+    IR_ENDFUNC,
+    IR_CALL,
+    IR_PUSHPARAM,
+    IR_POPPARAMS,
+    IR_DECLARATION,
 };
 
 static std::map<std::string, IR_OPERATION> opStringToEnum = {
@@ -43,6 +49,8 @@ class IRGenerator {
         // Generate TAC for specific types of nodes
         std::string genTACExpression(ASTNode * expr);
         void genTACStatement(ASTNode * statement);
+        void genTACFunction(ASTNode * func);
+        void genTACDeclaration(ASTNode * declaration);
 
         // Generate new temporary address
         std::string genAddress();
