@@ -59,6 +59,10 @@ static void printIRCode(std::list<TAC> code) {
                 std::cout << "\t" << "Allocate " << i.second << " " << i.first;
                 break;
             }
+            case IR_RETURN: {
+                std::cout << "\t" << "Return " << i.first;
+                break;
+            }
             default: {
                 std::cout << "\t" << "<IR NOT SUPPORTED BY irUtil>";
                 break;

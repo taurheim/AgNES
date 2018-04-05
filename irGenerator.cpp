@@ -80,6 +80,11 @@ void IRGenerator::genTACFunction(ASTNode * func) {
 void IRGenerator::genTACStatement(ASTNode * node) {
     StatementNode * statementNode = (StatementNode *)node;
     switch(statementNode->type) {
+        case STMT_RETURN: {
+            std::string returnValueRegister = genTACExpression(node->children[0]);
+            intermediateCode.push_back({ IR_RETURN, returnValueRegister });
+            break;
+        }
         case STMT_FUNCTIONCALL: {
             IdentifierNode * functionIdentifier = (IdentifierNode*) node->children[0];
             std::string functionName = functionIdentifier->name;

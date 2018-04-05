@@ -18,6 +18,7 @@ enum IR_OPERATION {
     IR_PUSHPARAM,
     IR_POPPARAMS,
     IR_DECLARATION,
+    IR_RETURN,
 };
 
 static std::map<std::string, IR_OPERATION> opStringToEnum = {
