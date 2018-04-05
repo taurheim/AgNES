@@ -1,8 +1,11 @@
 int x, y;
 
+int setY(int newY) {
+    y = newY;
+}
+
 int main() {
-    if (1){
-        x = x + 1;
-    }
+    x = 2;
+    setY(x);
 }
 

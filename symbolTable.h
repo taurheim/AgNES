@@ -60,12 +60,13 @@ class SymbolTable {
 
     public:
         SymbolTable();
-        void openScope();
+        void openScope(std::string scopeName);
         void closeScope();
         void print();
         void addVariable(VarType type, std::string varName);
         void addFunction(VarType returnType, std::string functionName);
         void addParam(VarType paramType, std::string paramName);
         STEntry * lookup(std::string name);
+        STEntry * lookupScope(std::string functionName);
         STEntry * getRoot();
 };

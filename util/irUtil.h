@@ -32,7 +32,7 @@ static void printIRCode(std::list<TAC> code) {
                 break;
             }
             case IR_BEGINFUNC: {
-                std::cout << "\t" << "BeginFunc " << i.first;
+                std::cout << "\t" << "BeginFunc " << i.first << " " << i.second;
                 break;
             }
             case IR_ENDFUNC: {
@@ -56,7 +56,7 @@ static void printIRCode(std::list<TAC> code) {
                 break;
             }
             case IR_DECLARATION: {
-                std::cout << "\t" << "Allocate " << i.second << " " << i.first;
+                std::cout << "\t" << "Declare " << i.first << " as " << i.second;
                 break;
             }
             case IR_RETURN: {

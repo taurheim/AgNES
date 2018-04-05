@@ -42,10 +42,11 @@ void SymbolTable::addEntry(STEntryType entryType, VarType varType, std::string v
     scopeIterator->next = newEntry;
 };
 
-void SymbolTable::openScope() {
+void SymbolTable::openScope(std::string scopeName) {
     currentScopeId++;
     STEntry * oldScope = currentScope;
     currentScope = new STEntry(ST_HEAD, currentScopeId);
+    currentScope->name = scopeName;
     
     // Fix references
     currentScope->parentScope = oldScope;
@@ -73,7 +74,16 @@ STEntry * SymbolTable::lookup(std::string name) {
 
         head = head->parentScope;
     }
+    return nullptr;
+}
 
+STEntry * SymbolTable::lookupScope(std::string functionName) {
+    STEntry * head = universe;
+    for (auto & child : universe->childScopes) {
+        if (child->name == functionName) {
+            return child;
+        }
+    }
     return nullptr;
 }
 

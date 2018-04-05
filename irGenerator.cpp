@@ -9,12 +9,13 @@ IRGenerator::IRGenerator(ASTNode * annotatedRoot) {
     labelCount = 0;
 }
 
-void IRGenerator::generate() {
+std::list<TAC> IRGenerator::generate() {
     // Go to main by default
 
     // Generate the rest of the code
     genTAC(root);
     printIRCode(intermediateCode);
+    return intermediateCode;
 }
 
 void IRGenerator::genTAC(ASTNode * node) {
@@ -63,7 +64,7 @@ void IRGenerator::genTACFunction(ASTNode * func) {
     intermediateCode.push_back({ IR_NEWLABEL, functionName->name});
 
     // TODO this doesn't support variables with different sizes
-    intermediateCode.push_back({ IR_BEGINFUNC });
+    intermediateCode.push_back({ IR_BEGINFUNC, functionName->name });
     auto beginFuncRef = std::prev(intermediateCode.end());
     int startingRegisterCount = registerCount;
 
@@ -74,7 +75,7 @@ void IRGenerator::genTACFunction(ASTNode * func) {
 
     intermediateCode.push_back({ IR_ENDFUNC });
     // Now that we know how many labels are used
-    (*beginFuncRef).first = std::to_string((registerCount - startingRegisterCount)*4);
+    (*beginFuncRef).second = std::to_string((registerCount - startingRegisterCount)*4);
 }
 
 void IRGenerator::genTACStatement(ASTNode * node) {
@@ -193,7 +194,7 @@ std::string IRGenerator::genTACExpression(ASTNode * expr) {
 }
 
 std::string IRGenerator::genAddress() {
-    return "_t" + std::to_string(registerCount++);
+    return "$t" + std::to_string(registerCount++);
 }
 
 std::string IRGenerator::genLabel() {

@@ -22,6 +22,7 @@ void SemanticAnalyzer::parseNode(ASTNode * node) {
         case AST_FUNCTION:
             {
                 VarType varType;
+                std::string functionName = "";
                 for (auto i = node->children.begin(); i != node->children.end(); i++) {
                     ASTNode * childNode = *i;
                     // Is TypeNode
@@ -35,8 +36,12 @@ void SemanticAnalyzer::parseNode(ASTNode * node) {
                     } else if (node->nodeType == AST_FUNCTION && i == node->children.begin() + 1) {
                         // Second child of AST_FUNCTION is an Identifier
                         IdentifierNode * idNode = (IdentifierNode *)(*i);
-                        std::string varName = idNode->name;
-                        symbolTable->addFunction(varType, varName);
+                        functionName = idNode->name;
+                        symbolTable->addFunction(varType, functionName);
+                    } else if (node->nodeType == AST_FUNCTION && childNode->nodeType == AST_PARAMETERLIST) {
+                        // Open the scope for the body of the function
+                        symbolTable->openScope(functionName);
+                        parseNode(childNode);
                     } else {
                         parseNode(childNode);
                     }
@@ -45,8 +50,6 @@ void SemanticAnalyzer::parseNode(ASTNode * node) {
             }
         case AST_PARAMETERLIST:
             {
-                // Open the scope for the body of the function
-                symbolTable->openScope();
                 for (auto i = node->children.begin(); i != node->children.end(); i++) {
                     ASTNode * childNode = *i; // Parameter
                     TypeNode * paramType = (TypeNode*) childNode->children[0];

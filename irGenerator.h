@@ -36,7 +36,7 @@ struct TAC {
 class IRGenerator {
     public:
         IRGenerator(ASTNode * annotatedRoot);
-        void generate();
+        std::list<TAC> generate();
     private:
         ASTNode * root;
         int registerCount;
