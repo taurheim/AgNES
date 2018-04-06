@@ -19,6 +19,11 @@ enum IR_OPERATION {
     IR_POPPARAMS,
     IR_DECLARATION,
     IR_RETURN,
+
+    // NES-Specific IR
+    IR_NES_WAITFORFRAME,
+    IR_NES_SETSPRITEX,
+    IR_NES_SETSPRITEY,
 };
 
 static std::map<std::string, IR_OPERATION> opStringToEnum = {

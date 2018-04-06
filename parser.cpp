@@ -237,6 +237,26 @@ ASTNode * Parser::statement() {
     StatementNode * node = new StatementNode();
 
     switch(t.type) {
+        case T_NES_WAITFORFRAME: {
+            next();
+            node->type = STMT_NES_WAITFORFRAME;
+            expect(T_SEMI);
+            break;
+        }
+        case T_NES_SETSPRITEX: {
+            next();
+            node->type = STMT_NES_SETSPRITEX;
+            node->children.push_back(identifier());
+            expect(T_SEMI);
+            break;
+        }
+        case T_NES_SETSPRITEY: {
+            next();
+            node->type = STMT_NES_SETSPRITEY;
+            node->children.push_back(identifier());
+            expect(T_SEMI);
+            break;
+        }
         case T_WHILE: {
             node->type = STMT_WHILE;
             next();

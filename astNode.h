@@ -34,6 +34,11 @@ enum StatementType {
     STMT_FUNCTIONCALL,
     STMT_BLOCK,
     STMT_EMPTY,
+    
+    // NES-specific statements
+    STMT_NES_WAITFORFRAME,
+    STMT_NES_SETSPRITEX,
+    STMT_NES_SETSPRITEY,
 };
 
 struct ASTNode {

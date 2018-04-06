@@ -32,6 +32,9 @@ static std::map<TokenType, std::string> tokenToStrMap = {
     { T_GREATERTHAN, "GREATERTHAN" },
     { T_WHILE, "WHILE" },
     { T_FOR, "FOR" },
+    { T_NES_WAITFORFRAME, "NES_WAITFORFRAME" },
+    { T_NES_SETSPRITEX, "NES_SETSPRITEX" },
+    { T_NES_SETSPRITEY, "NES_SETSPRITEY" },
 };
 
 static std::string tokenToStr(Token t) {

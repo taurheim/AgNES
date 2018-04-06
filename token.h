@@ -32,6 +32,11 @@ enum TokenType {
     T_GREATEREQUAL,
     T_AND,
     T_OR,
+
+    // NES-Specific
+    T_NES_WAITFORFRAME,
+    T_NES_SETSPRITEX,
+    T_NES_SETSPRITEY,
 };
 
 struct Token {

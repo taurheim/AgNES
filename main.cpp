@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstdio>
+#include <string>
 #include <fstream>
+#include <streambuf>
 #include "scanner.h"
 #include "token.h"
 #include "parser.h"
@@ -45,6 +47,24 @@ int main() {
     CodeGenerator codeGenerator = CodeGenerator(intermediateCode, symbolTable);
     std::string machineCode = codeGenerator.generate();
     std::cout << machineCode;
+
+    // Sandwich our machine code in the middle of the header and footer
+    std::cout << "Writing to output.s" << std::endl;
+    std::ifstream header("NES_HEADER.s");
+    std::string headerStr((std::istreambuf_iterator<char>(header)), std::istreambuf_iterator<char>());
+    std::ifstream footer("NES_FOOTER.s");
+    std::string footerStr((std::istreambuf_iterator<char>(footer)), std::istreambuf_iterator<char>());
+    std::remove("output.s");
+    std::ofstream outputFile;
+    outputFile.open("output.s");
+
+    outputFile << headerStr;
+    outputFile << machineCode;
+    outputFile << footerStr;
+
+    header.close();
+    footer.close();
+    outputFile.close();
 
     std::cout << "Finished Compilation." << std::endl;
 }

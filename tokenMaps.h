@@ -24,6 +24,8 @@ static std::map<std::string, TokenType> stringToToken = {
     {"while", TokenType::T_WHILE},
     {"if", TokenType::T_IF},
     {"else", TokenType::T_ELSE},
-    {"void", TokenType::T_VOID}
-
+    {"void", TokenType::T_VOID},
+    {"NESWAITFORFRAME", TokenType::T_NES_WAITFORFRAME},
+    {"NESSETSPRITEX", TokenType::T_NES_SETSPRITEX},
+    {"NESSETSPRITEY", TokenType::T_NES_SETSPRITEY},
 };

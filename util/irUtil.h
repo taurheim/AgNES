@@ -63,6 +63,18 @@ static void printIRCode(std::list<TAC> code) {
                 std::cout << "\t" << "Return " << i.first;
                 break;
             }
+            case IR_NES_WAITFORFRAME: {
+                std::cout << "\t" << "NES_WAITFORFRAME";
+                break;
+            }
+            case IR_NES_SETSPRITEX: {
+                std::cout << "\t" << "NES_SETSPRITEX " << i.first;
+                break;
+            }
+            case IR_NES_SETSPRITEY: {
+                std::cout << "\t" << "NES_SETSPRITEY " << i.first;
+                break;
+            }
             default: {
                 std::cout << "\t" << "<IR NOT SUPPORTED BY irUtil>";
                 break;

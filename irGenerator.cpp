@@ -81,6 +81,24 @@ void IRGenerator::genTACFunction(ASTNode * func) {
 void IRGenerator::genTACStatement(ASTNode * node) {
     StatementNode * statementNode = (StatementNode *)node;
     switch(statementNode->type) {
+        case STMT_NES_WAITFORFRAME: {
+            intermediateCode.push_back({ IR_NES_WAITFORFRAME });
+            break;
+        }
+        case STMT_NES_SETSPRITEX: {
+            IdentifierNode * globalIdentifier = (IdentifierNode*) node->children[0];
+            std::string varName = globalIdentifier->name;
+
+            intermediateCode.push_back({ IR_NES_SETSPRITEX, varName });
+            break;
+        }
+        case STMT_NES_SETSPRITEY: {
+            IdentifierNode * globalIdentifier = (IdentifierNode*) node->children[0];
+            std::string varName = globalIdentifier->name;
+
+            intermediateCode.push_back({ IR_NES_SETSPRITEY, varName });
+            break;
+        }
         case STMT_RETURN: {
             std::string returnValueRegister = genTACExpression(node->children[0]);
             intermediateCode.push_back({ IR_RETURN, returnValueRegister });

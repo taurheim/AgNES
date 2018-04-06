@@ -75,6 +75,25 @@ void CodeGenerator::generateCodeFromTAC(TAC tac) {
             code << "RTS" << nl;
             break;
         }
+        case IR_NES_WAITFORFRAME: {
+            code << "INC 99" << nl;
+            code << "wait_for_frame:" << nl;
+            code << "LDA 99" << nl;
+            code << "BNE wait_for_frame" << nl;
+            break;
+        }
+        case IR_NES_SETSPRITEX: {
+            int offset = globalToAddressMap[tac.first];
+            code << "LDA " << offset << nl;
+            code << "STA $0203" << nl;
+            break;
+        }
+        case IR_NES_SETSPRITEY: {
+            int offset = globalToAddressMap[tac.first];
+            code << "LDA " << offset << nl;
+            code << "STA $0200" << nl;
+            break;
+        }
     }
 }
 

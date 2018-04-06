@@ -31,6 +31,9 @@ static std::map<StatementType, std::string> statementTypeToString = {
     {STMT_FUNCTIONCALL, "FUNCTIONCALL"},
     {STMT_BLOCK, "BLOCK"},
     {STMT_EMPTY, "EMPTY"},
+    {STMT_NES_WAITFORFRAME, "NES_WAITFORFRAME"},
+    {STMT_NES_SETSPRITEX, "NES_SETSPRITEX"},
+    {STMT_NES_SETSPRITEY, "NES_SETSPRITEY"},
 };
 
 static void printNode(std::string indent, bool last, ASTNode * node) {
