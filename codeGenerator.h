@@ -12,6 +12,7 @@ enum CodeVarType {
     CVT_LOCAL,
     CVT_GLOBAL,
     CVT_CONST,
+    CVT_PARAM,
 };
 
 struct CodeVar {
@@ -24,7 +25,7 @@ class CodeGenerator {
         CodeGenerator(std::list<TAC> intermediateCode, SymbolTable * symbolTable);
         std::string generate();
     private:
-        const std::string nl = "\n";
+        const std::string nl = "\n ";
         std::list<TAC> intermediateCode;
         std::ostringstream code;
         std::map<std::string, int> globalToAddressMap;
@@ -46,6 +47,10 @@ class CodeGenerator {
         void generatePushParam(TAC tac);
         void generatePopParams(TAC tac);
         void generateSubroutineCall(TAC tac);
+
+        void setupLocalAddress(int offset);
+        void loadLocalIntoA(int offset);
+
         void beginFunc(std::string funcName);
         void allocateGlobal(std::string name, std::string type);
         void allocateStackSpace(int size);

@@ -6,7 +6,7 @@ CodeGenerator::CodeGenerator(std::list<TAC> intermediateCode, SymbolTable * symb
  intermediateCode (intermediateCode),
  symbolTable (symbolTable) {
      currentGlobalOffset = 0;
-     currentLocalOffset = 8;
+     currentLocalOffset = 2;
      jumpedToMain = false;
 }
 
@@ -30,6 +30,7 @@ void CodeGenerator::generateCodeFromTAC(TAC tac) {
                 code << "JMP main" << nl;
                 jumpedToMain = true;
             }
+            code.seekp(-1, code.cur);
             code << tac.first << ":" << nl;
             break;
         } 
@@ -83,8 +84,7 @@ void CodeGenerator::generateAssign(TAC tac) {
     CodeVar right = lookup(tac.second);
     if (left.type == CVT_GLOBAL) {
         if (right.type == CVT_LOCAL) {
-            code << "LDY #" << right.value << nl;
-            code << "LDA ($0),Y" << nl;
+            loadLocalIntoA(right.value);
             code << "STA " << padAddress(left.value) << nl;
         }
         else { //const
@@ -93,21 +93,47 @@ void CodeGenerator::generateAssign(TAC tac) {
         }
     }
     else if (left.type == CVT_LOCAL) {
+
         if (right.type == CVT_GLOBAL) {
+            code << "; local := global" << nl;
+            setupLocalAddress(left.value);
             code << "LDA " << padAddress(right.value) << nl;
-            code << "LDY #" << left.value << nl;
-            code << "STA ($0),Y" << nl;
+            code << "LDY #0" << nl;
+            code << "STA ($2),Y" << nl;
         }
         else if (right.type == CVT_LOCAL) {
-            code << "LDY #" << right.value << nl;
-            code << "LDA ($0),Y" << nl;
-            code << "LDY #" << left.value << nl;
-            code << "STA ($0),Y" << nl;
+            code << "; local := local" << nl;
+            loadLocalIntoA(right.value);
+            code << "TAX" << nl;
+            setupLocalAddress(left.value);
+            code << "TXA" << nl;
+            code << "STA ($2),Y" << nl;
+        }
+        else if (right.type == CVT_PARAM) {
+            code << "; local := param" << nl;
+            //Set up the stack memory to get RHS
+            code << "LDA $0" << nl;
+            code << "CLC" << nl; // Stupid carry
+            code << "ADC #" << right.value << nl;
+            code << "STA $2" << nl;
+
+            //Actually reference it now
+            code << "LDY #0" << nl;
+            code << "LDA ($2),Y" << nl;
+            code << "TAX" << nl;
+
+            setupLocalAddress(left.value);
+            //Move the value from RHS into LHS
+            code << "TXA" << nl;
+            code << "STA ($2),Y" << nl;
         }
         else { //const
+            code << "; local := const" << nl;
+            setupLocalAddress(left.value);
+            //Actually reference it now
             code << "LDA #" << right.value << nl;
-            code << "LDY #" << left.value << nl;
-            code << "STA ($0),Y" << nl;
+            code << "LDY #0" << nl;
+            code << "STA ($2),Y" << nl;
         }
     }
 }
@@ -117,28 +143,34 @@ void CodeGenerator::generateAddition(TAC tac) {
     CodeVar assignTo = lookup(tac.first);
     CodeVar arg1 = lookup(tac.second);
     CodeVar arg2 = lookup(tac.third);
-    code << "LDY #" << arg1.value << nl;
-    code << "LDA ($0),Y" << nl;
-    code << "LDY #" << arg2.value << nl;
-    code << "ADC ($0),Y" << nl;
-    code << "LDY #" << assignTo.value << nl;
-    code << "STA ($0),Y" << nl;
+
+    loadLocalIntoA(arg1.value);
+    code << "TAX" << nl;
+    setupLocalAddress(arg2.value);
+    code << "TXA" << nl;
+    code << "LDY #0" << nl;
+    code << "CLC" << nl; // Stupid carry
+    code << "ADC ($2),Y" << nl;
+    //Move A to assignTo
+    code << "TAX" << nl;
+    setupLocalAddress(assignTo.value);
+    code << "TXA" << nl;
+    code << "LDY #0" << nl;
+    code << "STA ($2),Y" << nl;
 }
 
 void CodeGenerator::generateBranchOnCondition(TAC tac, bool condition) {
     code << "; branch if " << tac.first << " is " << condition << nl;
     CodeVar var = lookup(tac.first);
-    code << "LDY #" << var.value << nl;
-    code << "LDA ($0),Y" << nl;
-    code << "CPA #" << condition << nl;
+    loadLocalIntoA(var.value);
+    code << "CMP #" << condition << nl;
     code << "BEQ " << tac.second << nl;
 }
 
 void CodeGenerator::generatePushParam(TAC tac) {
     CodeVar param = lookup(tac.first);
     code << "; push param " << tac.first << nl;
-    code << "LDY #" << param.value << nl;
-    code << "LDA ($0),Y" << nl;
+    loadLocalIntoA(param.value);
     code << "PHA" << nl;
 }
 
@@ -147,7 +179,7 @@ void CodeGenerator::generatePopParams(TAC tac) {
     int size = std::stoi(tac.first);
     while (size > 0) {
         code << "PLA" << nl;
-        size -= 4;
+        size--;
     }
 }
 
@@ -168,25 +200,63 @@ void CodeGenerator::generateSubroutineCall(TAC tac) {
 }
 
 void CodeGenerator::generateFramePointer() {
-    code << "; create frame pointer " << nl;
+    code << "; frame pointer setup " << nl;
     code << "TSX" << nl; //Save SP to X
     code << "STX 0000" << nl; //Save SP to mem at 0000
+    code << "PHA" << nl << "PHA" << nl; //Fake PC
+    code << "LDX #1" << nl; // TEMP FRAME POINTER
+    code << "STX 0003" << nl;
     globalToAddressMap["$fp"] = currentGlobalOffset;
-    currentGlobalOffset += 4;
+    currentGlobalOffset += 4; // Just allocated 4 things
 }
 
+void CodeGenerator::setupLocalAddress(int offset){
+    //Set up the stack memory to get local
+    code << "LDA $0" << nl;
+    code << "SEC" << nl; //Set stupid carry
+    code << "SBC #" << offset << nl;
+    code << "STA $2" << nl;
+}
+
+void CodeGenerator::loadLocalIntoA(int offset){
+    setupLocalAddress(offset);
+    //Actually reference it now
+    code << "LDY #0" << nl;
+    code << "LDA ($2),Y" << nl;
+}
+
+// void CodeGenerator::beginFunc(std::string funcName) {
+//     currentLocalOffset = 2;
+//     currentParamMap.clear();
+//     int paramCount = 2;
+//     code << "; beginfunc " << funcName << nl;
+//     STEntry * functionScope = symbolTable->lookupScope(funcName);
+//     STEntry * currentEntry = functionScope->next;
+//     while (currentEntry != nullptr) {
+//         std::string name = currentEntry->name;
+//         currentParamMap[name] = (paramCount++);
+//         code << "; arg " << name << " has stack offset " << currentParamMap[name] << nl;  
+//         currentEntry = currentEntry->next;
+//     }
+// }
+
 void CodeGenerator::beginFunc(std::string funcName) {
-    currentLocalOffset = 8;
+    currentLocalOffset = 2;
     currentParamMap.clear();
-    int paramCount = 1;
+    int paramCount = 2;
     code << "; beginfunc " << funcName << nl;
     STEntry * functionScope = symbolTable->lookupScope(funcName);
     STEntry * currentEntry = functionScope->next;
+    std::list<std::string> paramNames;
     while (currentEntry != nullptr) {
-        currentParamMap[currentEntry->name] = (paramCount++) * 4;
-        code << "; arg " << currentEntry->name << " has stack offset " << currentParamMap[currentEntry->name] << nl;
+        std::string name = currentEntry->name;
+        paramNames.push_front(name); 
         currentEntry = currentEntry->next;
     }
+    for (auto & name : paramNames) {
+        currentParamMap[name] = (paramCount++);
+        code << "; arg " << name << " has stack offset " << currentParamMap[name] << nl; 
+    } 
 }
 
 void CodeGenerator::allocateGlobal(std::string name, std::string type) {
@@ -195,13 +265,14 @@ void CodeGenerator::allocateGlobal(std::string name, std::string type) {
     code << "LDA #0" << nl; //Initialize with 0
     code << "STA " << padAddress(address) << nl; //Put in memory
     globalToAddressMap[name] = address;
-    currentGlobalOffset += 4; //Will vary depending on type in the future
+    currentGlobalOffset++; //Will vary depending on type in the future
 }
 
 void CodeGenerator::allocateStackSpace(int size) {
     code << "; allocate stack space " << size << nl;
     code << "TSX" << nl;
     code << "TXA" << nl;
+    code << "SEC" << nl; //Set stupid carry
     code << "SBC #" << size << nl;
     code << "TAX" << nl;
     code << "TXS" << nl;
@@ -216,7 +287,7 @@ CodeVar CodeGenerator::lookup(std::string varName) {
         return {CVT_CONST, value};  
     }
     if (currentParamMap.find(varName) != currentParamMap.end()) {
-        return {CVT_LOCAL, currentParamMap[varName]};
+        return {CVT_PARAM, currentParamMap[varName]};
     }
     if (globalToAddressMap.find(varName) != globalToAddressMap.end()) {
         return {CVT_GLOBAL, globalToAddressMap[varName]};
@@ -224,8 +295,8 @@ CodeVar CodeGenerator::lookup(std::string varName) {
     if (localToOffsetMap.find(varName) != localToOffsetMap.end()) {
         return {CVT_LOCAL, localToOffsetMap[varName]};
     }
-    localToOffsetMap[varName] = 256 - currentLocalOffset;
-    currentLocalOffset += 4;
+    localToOffsetMap[varName] = currentLocalOffset;
+    currentLocalOffset++;
     return {CVT_LOCAL, localToOffsetMap[varName]};
 }
 

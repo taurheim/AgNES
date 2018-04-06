@@ -75,7 +75,7 @@ void IRGenerator::genTACFunction(ASTNode * func) {
 
     intermediateCode.push_back({ IR_ENDFUNC });
     // Now that we know how many labels are used
-    (*beginFuncRef).second = std::to_string((registerCount - startingRegisterCount)*4);
+    (*beginFuncRef).second = std::to_string((registerCount - startingRegisterCount));
 }
 
 void IRGenerator::genTACStatement(ASTNode * node) {
@@ -105,7 +105,7 @@ void IRGenerator::genTACStatement(ASTNode * node) {
             intermediateCode.push_back({ IR_CALL, functionName});
 
             // Pop the params off the stack
-            intermediateCode.push_back({ IR_POPPARAMS, std::to_string(parameterCount*4)});
+            intermediateCode.push_back({ IR_POPPARAMS, std::to_string(parameterCount)});
             break;
         }
         case (STMT_WHILE): {

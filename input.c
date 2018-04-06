@@ -1,12 +1,8 @@
-int x, y;
-
-int setYandX(int newY, int newX) {
-    x = newX;
-    y = newY;
-    return 0;
-}
+int x;
 
 int main() {
-    setYandX(2, 3);
+    while (1){
+        x = x + 1;
+    }
 }
 
