@@ -12,7 +12,6 @@ enum CodeVarType {
     CVT_LOCAL,
     CVT_GLOBAL,
     CVT_CONST,
-    CVT_PARAM,
 };
 
 struct CodeVar {
@@ -33,6 +32,7 @@ class CodeGenerator {
         std::map<std::string, int> currentParamMap;
         SymbolTable * symbolTable;
 
+        bool jumpedToMain; // Ensure we start running at main and not at functions defined above main
         int currentGlobalOffset;
         int currentLocalOffset;
 

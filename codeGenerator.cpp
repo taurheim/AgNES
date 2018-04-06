@@ -7,6 +7,7 @@ CodeGenerator::CodeGenerator(std::list<TAC> intermediateCode, SymbolTable * symb
  symbolTable (symbolTable) {
      currentGlobalOffset = 0;
      currentLocalOffset = 8;
+     jumpedToMain = false;
 }
 
 std::string CodeGenerator::generate() {
@@ -25,6 +26,10 @@ void CodeGenerator::generateCodeFromTAC(TAC tac) {
             break;
         }
         case IR_NEWLABEL: {
+            if (!jumpedToMain) {
+                code << "JMP main" << nl;
+                jumpedToMain = true;
+            }
             code << tac.first << ":" << nl;
             break;
         } 
@@ -77,7 +82,7 @@ void CodeGenerator::generateAssign(TAC tac) {
     CodeVar left = lookup(tac.first);
     CodeVar right = lookup(tac.second);
     if (left.type == CVT_GLOBAL) {
-        if (right.type == CVT_LOCAL || right.type == CVT_PARAM) {
+        if (right.type == CVT_LOCAL) {
             code << "LDY #" << right.value << nl;
             code << "LDA ($0),Y" << nl;
             code << "STA " << padAddress(left.value) << nl;
@@ -87,9 +92,15 @@ void CodeGenerator::generateAssign(TAC tac) {
             code << "STA " << padAddress(left.value) << nl;
         }
     }
-    else if (left.type == CVT_LOCAL || left.type == CVT_PARAM) {
+    else if (left.type == CVT_LOCAL) {
         if (right.type == CVT_GLOBAL) {
             code << "LDA " << padAddress(right.value) << nl;
+            code << "LDY #" << left.value << nl;
+            code << "STA ($0),Y" << nl;
+        }
+        else if (right.type == CVT_LOCAL) {
+            code << "LDY #" << right.value << nl;
+            code << "LDA ($0),Y" << nl;
             code << "LDY #" << left.value << nl;
             code << "STA ($0),Y" << nl;
         }
@@ -205,7 +216,7 @@ CodeVar CodeGenerator::lookup(std::string varName) {
         return {CVT_CONST, value};  
     }
     if (currentParamMap.find(varName) != currentParamMap.end()) {
-        return {CVT_PARAM, currentParamMap[varName]};
+        return {CVT_LOCAL, currentParamMap[varName]};
     }
     if (globalToAddressMap.find(varName) != globalToAddressMap.end()) {
         return {CVT_GLOBAL, globalToAddressMap[varName]};

@@ -45,7 +45,19 @@
         "list": "cpp",
         "iterator": "cpp",
         "sstream": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "__functional_base": "cpp",
+        "__functional_base_03": "cpp",
+        "__tree": "cpp",
+        "__tuple": "cpp",
+        "chrono": "cpp",
+        "functional": "cpp",
+        "memory": "cpp",
+        "ratio": "cpp",
+        "__bit_reference": "cpp",
+        "algorithm": "cpp",
+        "atomic": "cpp",
+        "bitset": "cpp"
     },
     "python.linting.pylintEnabled": false
 }
