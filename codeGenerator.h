@@ -12,6 +12,7 @@ enum CodeVarType {
     CVT_LOCAL,
     CVT_GLOBAL,
     CVT_CONST,
+    CVT_PARAM,
 };
 
 struct CodeVar {
@@ -43,6 +44,8 @@ class CodeGenerator {
         void generateBranchOnCondition(TAC tac, bool condition);
         void generateJump(TAC tac);
         void generatePushParam(TAC tac);
+        void generatePopParams(TAC tac);
+        void generateSubroutineCall(TAC tac);
         void beginFunc(std::string funcName);
         void allocateGlobal(std::string name, std::string type);
         void allocateStackSpace(int size);

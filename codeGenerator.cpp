@@ -6,7 +6,7 @@ CodeGenerator::CodeGenerator(std::list<TAC> intermediateCode, SymbolTable * symb
  intermediateCode (intermediateCode),
  symbolTable (symbolTable) {
      currentGlobalOffset = 0;
-     currentLocalOffset = 4;
+     currentLocalOffset = 8;
 }
 
 std::string CodeGenerator::generate() {
@@ -55,6 +55,19 @@ void CodeGenerator::generateCodeFromTAC(TAC tac) {
         }
         case IR_PUSHPARAM: {
             generatePushParam(tac);
+            break;
+        }
+        case IR_POPPARAMS: {
+            generatePopParams(tac);
+            break;
+        }
+        case IR_CALL: {
+            generateSubroutineCall(tac);
+            break;
+        }
+        case IR_RETURN: {
+            code << "RTS" << nl;
+            break;
         }
     }
 }
@@ -64,7 +77,7 @@ void CodeGenerator::generateAssign(TAC tac) {
     CodeVar left = lookup(tac.first);
     CodeVar right = lookup(tac.second);
     if (left.type == CVT_GLOBAL) {
-        if (right.type == CVT_LOCAL) {
+        if (right.type == CVT_LOCAL || right.type == CVT_PARAM) {
             code << "LDY #" << right.value << nl;
             code << "LDA ($0),Y" << nl;
             code << "STA " << padAddress(left.value) << nl;
@@ -74,7 +87,7 @@ void CodeGenerator::generateAssign(TAC tac) {
             code << "STA " << padAddress(left.value) << nl;
         }
     }
-    else if (left.type == CVT_LOCAL) {
+    else if (left.type == CVT_LOCAL || left.type == CVT_PARAM) {
         if (right.type == CVT_GLOBAL) {
             code << "LDA " << padAddress(right.value) << nl;
             code << "LDY #" << left.value << nl;
@@ -105,14 +118,42 @@ void CodeGenerator::generateBranchOnCondition(TAC tac, bool condition) {
     code << "; branch if " << tac.first << " is " << condition << nl;
     CodeVar var = lookup(tac.first);
     code << "LDY #" << var.value << nl;
-    code << "LDA ($0), Y" << nl;
+    code << "LDA ($0),Y" << nl;
     code << "CPA #" << condition << nl;
     code << "BEQ " << tac.second << nl;
+}
+
+void CodeGenerator::generatePushParam(TAC tac) {
+    CodeVar param = lookup(tac.first);
+    code << "; push param " << tac.first << nl;
+    code << "LDY #" << param.value << nl;
+    code << "LDA ($0),Y" << nl;
+    code << "PHA" << nl;
+}
+
+void CodeGenerator::generatePopParams(TAC tac) {
+    code << "; pop params one byte at a time..." << nl;
+    int size = std::stoi(tac.first);
+    while (size > 0) {
+        code << "PLA" << nl;
+        size -= 4;
+    }
 }
 
 void CodeGenerator::generateJump(TAC tac) {
     code << "; jump to " << tac.first << nl;
     code << "JMP " << tac.first << nl;
+}
+
+void CodeGenerator::generateSubroutineCall(TAC tac) {
+    code << "; push FP, call, restore FP" << nl;
+    code << "LDA $0" << nl;
+    code << "PHA" << nl; //Push FP
+    code << "TSX" << nl; //Get stack pointer
+    code << "STX $0" << nl; //Set FP to stack pointer
+    code << "JSR " << tac.first << nl;
+    code << "PLA" << nl; //Pop FP
+    code << "STA $0" << nl;  //Set FP to old FP
 }
 
 void CodeGenerator::generateFramePointer() {
@@ -124,14 +165,14 @@ void CodeGenerator::generateFramePointer() {
 }
 
 void CodeGenerator::beginFunc(std::string funcName) {
-    currentLocalOffset = 4;
+    currentLocalOffset = 8;
     currentParamMap.clear();
     int paramCount = 1;
     code << "; beginfunc " << funcName << nl;
     STEntry * functionScope = symbolTable->lookupScope(funcName);
     STEntry * currentEntry = functionScope->next;
     while (currentEntry != nullptr) {
-        currentParamMap[currentEntry->name] = (paramCount++)*(-4);
+        currentParamMap[currentEntry->name] = (paramCount++) * 4;
         code << "; arg " << currentEntry->name << " has stack offset " << currentParamMap[currentEntry->name] << nl;
         currentEntry = currentEntry->next;
     }
@@ -150,7 +191,7 @@ void CodeGenerator::allocateStackSpace(int size) {
     code << "; allocate stack space " << size << nl;
     code << "TSX" << nl;
     code << "TXA" << nl;
-    code << "ADC #" << size << nl;
+    code << "SBC #" << size << nl;
     code << "TAX" << nl;
     code << "TXS" << nl;
 }
@@ -163,13 +204,16 @@ CodeVar CodeGenerator::lookup(std::string varName) {
         int value = std::stoi(varName);
         return {CVT_CONST, value};  
     }
+    if (currentParamMap.find(varName) != currentParamMap.end()) {
+        return {CVT_PARAM, currentParamMap[varName]};
+    }
     if (globalToAddressMap.find(varName) != globalToAddressMap.end()) {
         return {CVT_GLOBAL, globalToAddressMap[varName]};
     }
     if (localToOffsetMap.find(varName) != localToOffsetMap.end()) {
         return {CVT_LOCAL, localToOffsetMap[varName]};
     }
-    localToOffsetMap[varName] = currentLocalOffset;
+    localToOffsetMap[varName] = 256 - currentLocalOffset;
     currentLocalOffset += 4;
     return {CVT_LOCAL, localToOffsetMap[varName]};
 }
