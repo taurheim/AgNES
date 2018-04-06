@@ -6,7 +6,7 @@
 #include <string>
 #include <list>
 #include <map>
-#include <sstream>c
+#include <sstream>
 
 enum CodeVarType {
     CVT_LOCAL,
