@@ -57,7 +57,9 @@
         "__bit_reference": "cpp",
         "algorithm": "cpp",
         "atomic": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "xlocmon": "cpp",
+        "xloctime": "cpp"
     },
     "python.linting.pylintEnabled": false
 }

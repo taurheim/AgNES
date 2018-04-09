@@ -73,9 +73,11 @@ void IRGenerator::genTACFunction(ASTNode * func) {
         genTACStatement(statement);
     }
 
-    intermediateCode.push_back({ IR_ENDFUNC });
+    // How many locals are there
+    std::string localsCount = std::to_string((registerCount - startingRegisterCount));
+    intermediateCode.push_back({ IR_ENDFUNC, localsCount });
     // Now that we know how many labels are used
-    (*beginFuncRef).second = std::to_string((registerCount - startingRegisterCount));
+    (*beginFuncRef).second = localsCount;
 }
 
 void IRGenerator::genTACStatement(ASTNode * node) {

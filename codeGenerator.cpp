@@ -1,18 +1,23 @@
 #include "codeGenerator.h"
 #include <iomanip>
 #include <sstream>
+#include <cctype>
 
 CodeGenerator::CodeGenerator(std::list<TAC> intermediateCode, SymbolTable * symbolTable) :
  intermediateCode (intermediateCode),
  symbolTable (symbolTable) {
-     currentGlobalOffset = 0;
-     currentLocalOffset = 2;
-     jumpedToMain = false;
+    currentGlobalOffset = globalStart;
+    jumpedToMain = false;
 }
 
 std::string CodeGenerator::generate() {
-    //First save our frame-pointer
-    generateFramePointer();
+    // Make it easy to tell when our code starts
+    code << "; Code begins now" << nl;
+    code << "NOP" << nl << "NOP" << nl << "NOP" << nl;
+    // First set up our stack
+    initializeStack();
+
+    // Now run through the code line by line
     for (auto & tac : intermediateCode) {
         generateCodeFromTAC(tac);
     }
@@ -35,8 +40,7 @@ void CodeGenerator::generateCodeFromTAC(TAC tac) {
             break;
         } 
         case IR_BEGINFUNC: {
-            beginFunc(tac.first);
-            allocateStackSpace(std::stoi(tac.second));
+            generateBeginFunc(tac);
             break;
         }
         case IR_ASSIGN: {
@@ -75,7 +79,12 @@ void CodeGenerator::generateCodeFromTAC(TAC tac) {
             code << "RTS" << nl;
             break;
         }
+        case IR_ENDFUNC: {
+            generateEndFunc(tac);
+            break;
+        }
         case IR_NES_WAITFORFRAME: {
+            code << ";;;;;; NESWAITFORFRAME ;;;;;;" << nl;
             code << "INC 99" << nl;
             code << "wait_for_frame:" << nl;
             code << "LDA 99" << nl;
@@ -83,18 +92,51 @@ void CodeGenerator::generateCodeFromTAC(TAC tac) {
             break;
         }
         case IR_NES_SETSPRITEX: {
+            code << ";;;;;; NESSETSPRITEX ;;;;;;" << nl;
             int offset = globalToAddressMap[tac.first];
-            code << "LDA " << offset << nl;
+            loadGlobalIntoA(offset);
             code << "STA $0203" << nl;
             break;
         }
         case IR_NES_SETSPRITEY: {
+            code << ";;;;;; NESSETSPRITEY ;;;;;;" << nl;
             int offset = globalToAddressMap[tac.first];
-            code << "LDA " << offset << nl;
+            loadGlobalIntoA(offset);
             code << "STA $0200" << nl;
             break;
         }
     }
+}
+
+void CodeGenerator::initializeStack() {
+    // The stack should start with one "fake" item on it - the old FP, to which the current FP points
+    code << "; Initialize the stack" << nl;
+    code << "LDA #$FF" << nl;
+    code << "STA " << cSP << nl;
+    code << "STA " << cFP << nl;
+}
+
+void CodeGenerator::popStackToA() {
+    // X <- cSP
+    code << "LDX " << cSP << nl;
+
+    // A <- M[cSP]
+    code << "LDA $0,X" << nl;
+
+    // cSP++
+    code << "INC " << cSP << nl;
+}
+
+void CodeGenerator::pushAToStack() {
+    // cSP--
+    code << "DEC " << cSP << nl;
+    
+    // X <- cSP
+    code << "LDX " << cSP << nl;
+
+    // M[$0 + $cSP] <- A
+    // This effectively means we put the new item at the stack pointer in memory
+    code << "STA $0,X" << nl;
 }
 
 void CodeGenerator::generateAssign(TAC tac) {
@@ -103,56 +145,41 @@ void CodeGenerator::generateAssign(TAC tac) {
     CodeVar right = lookup(tac.second);
     if (left.type == CVT_GLOBAL) {
         if (right.type == CVT_LOCAL) {
+            // GLOBAL = LOCAL
+            code << "; global = local" << nl;
             loadLocalIntoA(right.value);
-            code << "STA " << padAddress(left.value) << nl;
+            storeAIntoGlobal(left.value);
         }
-        else { //const
-            code << "LDA #" << right.value << nl;
-            code << "STA " << padAddress(left.value) << nl;
+        else {
+            // GLOBAL = CONST
+            code << "; global = const" << nl;
+            loadConstIntoA(right.value);
+            storeAIntoGlobal(left.value);
         }
     }
     else if (left.type == CVT_LOCAL) {
-
         if (right.type == CVT_GLOBAL) {
+            // LOCAL = GLOBAL
             code << "; local := global" << nl;
-            setupLocalAddress(left.value);
-            code << "LDA " << padAddress(right.value) << nl;
-            code << "LDY #0" << nl;
-            code << "STA ($2),Y" << nl;
+            loadGlobalIntoA(right.value);
+            storeAIntoLocal(left.value);
         }
         else if (right.type == CVT_LOCAL) {
+            // LOCAL = LOCAL
             code << "; local := local" << nl;
             loadLocalIntoA(right.value);
-            code << "TAX" << nl;
-            setupLocalAddress(left.value);
-            code << "TXA" << nl;
-            code << "STA ($2),Y" << nl;
+            storeAIntoLocal(left.value);
         }
         else if (right.type == CVT_PARAM) {
             code << "; local := param" << nl;
-            //Set up the stack memory to get RHS
-            code << "LDA $0" << nl;
-            code << "CLC" << nl; // Stupid carry
-            code << "ADC #" << right.value << nl;
-            code << "STA $2" << nl;
-
-            //Actually reference it now
-            code << "LDY #0" << nl;
-            code << "LDA ($2),Y" << nl;
-            code << "TAX" << nl;
-
-            setupLocalAddress(left.value);
-            //Move the value from RHS into LHS
-            code << "TXA" << nl;
-            code << "STA ($2),Y" << nl;
+            loadParamIntoA(right.value);
+            storeAIntoLocal(left.value);
         }
-        else { //const
+        else {
+            // LOCAL = CONST
             code << "; local := const" << nl;
-            setupLocalAddress(left.value);
-            //Actually reference it now
-            code << "LDA #" << right.value << nl;
-            code << "LDY #0" << nl;
-            code << "STA ($2),Y" << nl;
+            loadConstIntoA(right.value);
+            storeAIntoLocal(left.value);
         }
     }
 }
@@ -163,19 +190,26 @@ void CodeGenerator::generateAddition(TAC tac) {
     CodeVar arg1 = lookup(tac.second);
     CodeVar arg2 = lookup(tac.third);
 
+    // For now, use $0 as our adder
+    // This is bad and should not be done this way
+
+    // Set result to 0 to start
+    loadConstIntoA(0);
+    code << "STA $0" << nl;
+
+    // Add arg1
     loadLocalIntoA(arg1.value);
-    code << "TAX" << nl;
-    setupLocalAddress(arg2.value);
-    code << "TXA" << nl;
-    code << "LDY #0" << nl;
-    code << "CLC" << nl; // Stupid carry
-    code << "ADC ($2),Y" << nl;
-    //Move A to assignTo
-    code << "TAX" << nl;
-    setupLocalAddress(assignTo.value);
-    code << "TXA" << nl;
-    code << "LDY #0" << nl;
-    code << "STA ($2),Y" << nl;
+    code << "CLC" << nl;
+    code << "ADC $0" << nl;
+    code << "STA $0" << nl;
+
+    // Add arg2
+    loadLocalIntoA(arg2.value);
+    code << "CLC" << nl;
+    code << "ADC $0" << nl;
+
+    // Store the output
+    storeAIntoLocal(assignTo.value);
 }
 
 void CodeGenerator::generateBranchOnCondition(TAC tac, bool condition) {
@@ -190,16 +224,12 @@ void CodeGenerator::generatePushParam(TAC tac) {
     CodeVar param = lookup(tac.first);
     code << "; push param " << tac.first << nl;
     loadLocalIntoA(param.value);
-    code << "PHA" << nl;
+    pushAToStack();
 }
 
 void CodeGenerator::generatePopParams(TAC tac) {
-    code << "; pop params one byte at a time..." << nl;
-    int size = std::stoi(tac.first);
-    while (size > 0) {
-        code << "PLA" << nl;
-        size--;
-    }
+    code << "; Pop " << tac.first << " params" << nl;
+    deallocateStackSpace(stoi(tac.first));
 }
 
 void CodeGenerator::generateJump(TAC tac) {
@@ -209,61 +239,88 @@ void CodeGenerator::generateJump(TAC tac) {
 
 void CodeGenerator::generateSubroutineCall(TAC tac) {
     code << "; push FP, call, restore FP" << nl;
-    code << "LDA $0" << nl;
-    code << "PHA" << nl; //Push FP
-    code << "TSX" << nl; //Get stack pointer
-    code << "STX $0" << nl; //Set FP to stack pointer
+
+    // Push cFP to stack
+    code << "LDA " << cFP << nl;
+    pushAToStack();
+    
+    // Set cFP to cSP
+    code << "LDA " << cSP << nl;
+    code << "STA " << cFP << nl;
+
+    // Call function
     code << "JSR " << tac.first << nl;
-    code << "PLA" << nl; //Pop FP
-    code << "STA $0" << nl;  //Set FP to old FP
-}
 
-void CodeGenerator::generateFramePointer() {
-    code << "; frame pointer setup " << nl;
-    code << "TSX" << nl; //Save SP to X
-    code << "STX 0000" << nl; //Save SP to mem at 0000
-    code << "PHA" << nl << "PHA" << nl; //Fake PC
-    code << "LDX #1" << nl; // TEMP FRAME POINTER
-    code << "STX 0003" << nl;
-    globalToAddressMap["$fp"] = currentGlobalOffset;
-    currentGlobalOffset += 4; // Just allocated 4 things
-}
-
-void CodeGenerator::setupLocalAddress(int offset){
-    //Set up the stack memory to get local
-    code << "LDA $0" << nl;
-    code << "SEC" << nl; //Set stupid carry
-    code << "SBC #" << offset << nl;
-    code << "STA $2" << nl;
+    // Restore FP
+    popStackToA();
+    code << "STA " << cFP << nl;
 }
 
 void CodeGenerator::loadLocalIntoA(int offset){
-    setupLocalAddress(offset);
-    //Actually reference it now
-    code << "LDY #0" << nl;
-    code << "LDA ($2),Y" << nl;
+    // Locals are located below the frame pointer in memory
+    /*
+        [ Locals ]
+        [ FP ]
+        [ Params ]
+    */
+    // X <- cFP
+    code << "LDX " << cFP << nl;
+    
+    // Subtracting is the same as adding 255 - num
+    // e.g. we want to load cFP - 3
+    // cFP = $F9
+    // cFP = $F9 - $3 = 0xF6
+    // $F9 + $FC = 0xF6
+    // $FD = $FF - $3 = 255 - 3 = 252
+    int adjustedOffset = 256 - offset;
+    code << "LDA " << adjustedOffset << ",X" << nl;
 }
 
-// void CodeGenerator::beginFunc(std::string funcName) {
-//     currentLocalOffset = 2;
-//     currentParamMap.clear();
-//     int paramCount = 2;
-//     code << "; beginfunc " << funcName << nl;
-//     STEntry * functionScope = symbolTable->lookupScope(funcName);
-//     STEntry * currentEntry = functionScope->next;
-//     while (currentEntry != nullptr) {
-//         std::string name = currentEntry->name;
-//         currentParamMap[name] = (paramCount++);
-//         code << "; arg " << name << " has stack offset " << currentParamMap[name] << nl;  
-//         currentEntry = currentEntry->next;
-//     }
-// }
+void CodeGenerator::loadParamIntoA(int offset) {
+    // Params are located above the frame pointer in memory
+    /*
+        [ Locals ]
+        [ FP ]
+        [ Params ]
+    */
+    code << "LDX " << cFP << nl;
+    code << "LDA " << offset << ",X" << nl;
+}
 
-void CodeGenerator::beginFunc(std::string funcName) {
-    currentLocalOffset = 2;
-    currentParamMap.clear();
-    int paramCount = 2;
+void CodeGenerator::loadGlobalIntoA(int address) {
+    code << "LDA " << padAddress(address) << nl;
+}
+
+void CodeGenerator::loadConstIntoA(int value) {
+    code << "LDA #" << value << nl;
+}
+
+void CodeGenerator::storeAIntoLocal(int offset) {
+    // Locals are below the frame pointer in memory
+    // Offset can't be 0 - locals start at 1
+    code << "LDX " << cFP << nl;
+    int adjustedOffset = 256 - offset;
+    code << "STA " << adjustedOffset << ",X" << nl;
+}
+
+void CodeGenerator::storeAIntoGlobal(int address) {
+    code << "STA " << padAddress(address) << nl;
+}
+
+void CodeGenerator::generateBeginFunc(TAC tac) {
+    std::string funcName = tac.first;
+    int paramSize = stoi(tac.second);
+
     code << "; beginfunc " << funcName << nl;
+    
+    // Allocate space for the locals
+    code << "; Allocating " << paramSize << " for locals" << nl;
+    allocateStackSpace(paramSize);
+
+    // Create a map for the local param names
+    currentLocalOffset = 1;
+    currentParamMap.clear();
+    int paramCount = 1;
     STEntry * functionScope = symbolTable->lookupScope(funcName);
     STEntry * currentEntry = functionScope->next;
     std::list<std::string> paramNames;
@@ -278,23 +335,40 @@ void CodeGenerator::beginFunc(std::string funcName) {
     } 
 }
 
+void CodeGenerator::generateEndFunc(TAC tac) {
+    code << "; endFunc" << nl;
+    int paramSize = stoi(tac.first);
+
+    // Deallocate space for locals
+    deallocateStackSpace(paramSize);
+
+    code << "RTS" << nl;
+}
+
 void CodeGenerator::allocateGlobal(std::string name, std::string type) {
     code << "; global " << name << nl;
     int address = currentGlobalOffset;
-    code << "LDA #0" << nl; //Initialize with 0
-    code << "STA " << padAddress(address) << nl; //Put in memory
+    loadConstIntoA(0);
+    storeAIntoGlobal(address);
     globalToAddressMap[name] = address;
     currentGlobalOffset++; //Will vary depending on type in the future
 }
 
 void CodeGenerator::allocateStackSpace(int size) {
-    code << "; allocate stack space " << size << nl;
-    code << "TSX" << nl;
-    code << "TXA" << nl;
-    code << "SEC" << nl; //Set stupid carry
-    code << "SBC #" << size << nl;
-    code << "TAX" << nl;
-    code << "TXS" << nl;
+    if (size == 0) return;
+    // SBC: A = A - M - (1 - C)
+    loadConstIntoA(256 - size);
+    code << "CLC" << nl;
+    code << "ADC " << cSP << nl;
+    code << "STA " << cSP << nl;
+}
+
+void CodeGenerator::deallocateStackSpace(int size) {
+    if (size == 0) return;
+    loadConstIntoA(size);
+    code << "CLC" << nl; //Set stupid carry
+    code << "ADC " << cSP << nl;
+    code << "STA " << cSP << nl;
 }
 
 //Look up variable to see if it already has a space in mem or the stack

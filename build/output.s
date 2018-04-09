@@ -108,166 +108,151 @@ load_background_loop:  ; palette to take that into account
   STA $2001
 
   ;; ------------ CODE BELOW -----------------
-; frame pointer setup 
- TSX
- STX 0000
- PHA
- PHA
- LDX #1
- STX 0003
+; Code begins now
+ NOP
+ NOP
+ NOP
+ ; Initialize the stack
+ LDA #$FF
+ STA $0400
+ STA $0401
  ; global x
  LDA #0
- STA 0004
+ STA 1026
  ; global y
  LDA #0
- STA 0005
+ STA 1027
  JMP main
+moveRight:
+ ; beginfunc moveRight
+ ; Allocating 3 for locals
+ LDA #253
+ CLC
+ ADC $0400
+ STA $0400
+ ; arg amount has stack offset 1
+ ; assign $t0 := x
+ ; local := global
+ LDA 1026
+ LDX $0401
+ STA 255,X
+ ; assign $t1 := amount
+ ; local := param
+ LDX $0401
+ LDA 1,X
+ LDX $0401
+ STA 254,X
+ ; add $t2 := $t0 + $t1
+ LDA #0
+ STA $0
+ LDX $0401
+ LDA 255,X
+ CLC
+ ADC $0
+ STA $0
+ LDX $0401
+ LDA 254,X
+ CLC
+ ADC $0
+ LDX $0401
+ STA 253,X
+ ; assign x := $t2
+ ; global = local
+ LDX $0401
+ LDA 253,X
+ STA 1026
+ ; endFunc
+ LDA #3
+ CLC
+ ADC $0400
+ STA $0400
+ RTS
 main:
  ; beginfunc main
- ; allocate stack space 7
- TSX
- TXA
- SEC
- SBC #7
- TAX
- TXS
- ; assign $t0 := 20
+ ; Allocating 4 for locals
+ LDA #252
+ CLC
+ ADC $0400
+ STA $0400
+ ; assign $t3 := 20
  ; local := const
- LDA $0
- SEC
- SBC #2
- STA $2
  LDA #20
- LDY #0
- STA ($2),Y
- ; assign x := $t0
- LDA $0
- SEC
- SBC #2
- STA $2
- LDY #0
- LDA ($2),Y
- STA 0004
- ; assign $t1 := 40
+ LDX $0401
+ STA 255,X
+ ; assign x := $t3
+ ; global = local
+ LDX $0401
+ LDA 255,X
+ STA 1026
+ ; assign $t4 := 40
  ; local := const
- LDA $0
- SEC
- SBC #3
- STA $2
  LDA #40
- LDY #0
- STA ($2),Y
- ; assign y := $t1
- LDA $0
- SEC
- SBC #3
- STA $2
- LDY #0
- LDA ($2),Y
- STA 0005
+ LDX $0401
+ STA 254,X
+ ; assign y := $t4
+ ; global = local
+ LDX $0401
+ LDA 254,X
+ STA 1027
 LABEL0:
- ; assign $t2 := 1
+ ; assign $t5 := 1
  ; local := const
- LDA $0
- SEC
- SBC #4
- STA $2
  LDA #1
- LDY #0
- STA ($2),Y
- ; branch if $t2 is 0
- LDA $0
- SEC
- SBC #4
- STA $2
- LDY #0
- LDA ($2),Y
+ LDX $0401
+ STA 253,X
+ ; branch if $t5 is 0
+ LDX $0401
+ LDA 253,X
  CMP #0
  BEQ LABEL1
+ ;;;;;; NESWAITFORFRAME ;;;;;;
  INC 99
  wait_for_frame:
  LDA 99
  BNE wait_for_frame
- ; assign $t3 := x
- ; local := global
- LDA $0
- SEC
- SBC #5
- STA $2
- LDA 0004
- LDY #0
- STA ($2),Y
- ; assign $t4 := 1
+ ; assign $t6 := 1
  ; local := const
- LDA $0
- SEC
- SBC #6
- STA $2
  LDA #1
- LDY #0
- STA ($2),Y
- ; add $t5 := $t3 + $t4
- LDA $0
- SEC
- SBC #5
- STA $2
- LDY #0
- LDA ($2),Y
- TAX
- LDA $0
- SEC
- SBC #6
- STA $2
- TXA
- LDY #0
+ LDX $0401
+ STA 252,X
+ ; push param $t6
+ LDX $0401
+ LDA 252,X
+ DEC $0400
+ LDX $0400
+ STA $0,X
+ ; push FP, call, restore FP
+ LDA $0401
+ DEC $0400
+ LDX $0400
+ STA $0,X
+ LDA $0400
+ STA $0401
+ JSR moveRight
+ LDX $0400
+ LDA $0,X
+ INC $0400
+ STA $0401
+ ; Pop 1 params
+ LDA #1
  CLC
- ADC ($2),Y
- TAX
- LDA $0
- SEC
- SBC #7
- STA $2
- TXA
- LDY #0
- STA ($2),Y
- ; assign x := $t5
- LDA $0
- SEC
- SBC #7
- STA $2
- LDY #0
- LDA ($2),Y
- STA 0004
- ; assign $t6 := a
- ; local := local
- LDA $0
- SEC
- SBC #9
- STA $2
- LDY #0
- LDA ($2),Y
- TAX
- LDA $0
- SEC
- SBC #8
- STA $2
- TXA
- STA ($2),Y
- ; assign y := $t6
- LDA $0
- SEC
- SBC #8
- STA $2
- LDY #0
- LDA ($2),Y
- STA 0005
- LDA 4
+ ADC $0400
+ STA $0400
+ ;;;;;; NESSETSPRITEX ;;;;;;
+ LDA 1026
  STA $0203
- LDA 5
+ ;;;;;; NESSETSPRITEY ;;;;;;
+ LDA 1027
  STA $0200
  ; jump to LABEL0
  JMP LABEL0
 LABEL1:
+ ; endFunc
+ LDA #4
+ CLC
+ ADC $0400
+ STA $0400
+ RTS
  
 ;; ----------------- CODE ENDS HERE -----------------------
 ; Executed every frame
