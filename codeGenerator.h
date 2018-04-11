@@ -82,31 +82,3 @@ class CodeGenerator {
         std::string padAddress(int num);
         bool isNumber(std::string str);
 };
-
-// enum OpCode {
-//     OP_TSX, //Transfer SP to X
-//     OP_STX, //Store X in _
-//     OP_LDA, //Load A with _
-//     OP_LDY, //Load Y with _
-//     OP_STA, //Store A in _
-//     OP_CMP, //Compare A with _
-//     OP_BEQ, //Branch if equal to _
-//     OP_ADC, //Add A to _ with carry
-//     OP_JMP, //Jump to _
-//     OP_JSR, //Jump to subroutine _ (saves address and stuff)
-//     OP_RTS, //Return from subroutine
-// };
-
-// enum Mode {
-//     MODE_IMPLIED,
-//     MODE_IMMEDIATE,
-//     MODE_ABSOLUTE,
-//     MODE_INDIRECT_Y,
-// };
-
-// // 6502 instruction!
-// struct Instruction {
-//     OpCode op;
-//     int arg = 0;
-//     Mode mode = MODE_IMPLIED;
-// };

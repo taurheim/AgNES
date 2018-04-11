@@ -12,11 +12,18 @@
 #include "irGenerator.h"
 #include "codeGenerator.h"
 
-int main() {
+int main(int argc, char * argv[]) {
+    if (argc < 3) {
+        std::cout << "Did not provide enough arguments. Usage: AgNES input_file.c output_file.s\n";
+        return 1;
+    }
+    char * inputFileName = argv[1];
+    char * outputFileName = argv[2];
+
     // First we run Lexical Analysis, to turn the stream of characters into a list of tokens
     // Input: file
     // Output: list of tokens
-    std::ifstream file ("input.c");
+    std::ifstream file (inputFileName);
     std::list<Token> tokens;
     if (file.is_open()) {
         Scanner scanner = Scanner(file);
@@ -49,14 +56,14 @@ int main() {
     std::cout << machineCode;
 
     // Sandwich our machine code in the middle of the header and footer
-    std::cout << "Writing to output.s" << std::endl;
+    std::cout << "Writing to " << outputFileName << std::endl;
     std::ifstream header("NES_HEADER.s");
     std::string headerStr((std::istreambuf_iterator<char>(header)), std::istreambuf_iterator<char>());
     std::ifstream footer("NES_FOOTER.s");
     std::string footerStr((std::istreambuf_iterator<char>(footer)), std::istreambuf_iterator<char>());
-    std::remove("output.s");
+    std::remove(outputFileName);
     std::ofstream outputFile;
-    outputFile.open("output.s");
+    outputFile.open(outputFileName);
 
     outputFile << headerStr;
     outputFile << machineCode;
