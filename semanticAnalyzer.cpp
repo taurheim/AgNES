@@ -9,6 +9,7 @@ SemanticAnalyzer::SemanticAnalyzer(ASTNode * root)
 }
 
 SymbolTable * SemanticAnalyzer::analyze() {
+    
     parseNode(root);
 
     printSymbolTable(symbolTable);

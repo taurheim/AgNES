@@ -59,7 +59,9 @@
         "atomic": "cpp",
         "bitset": "cpp",
         "xlocmon": "cpp",
-        "xloctime": "cpp"
+        "xloctime": "cpp",
+        "locale": "cpp",
+        "__locale": "cpp"
     },
     "python.linting.pylintEnabled": false
 }

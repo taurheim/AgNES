@@ -31,7 +31,7 @@ struct STEntry {
     int scopeId;
     //optionals
     STTypeDescriptor * typeDescriptor; // Set if entryType in (VAR, PARAM, CONST, TYPE, FUNCTION)
-    STEntry * next;
+    STEntry * next = nullptr;
     STEntry * parentScope; // scope directly outside this scope, for ST_HEAD only (aka "desc")
     std::list<STEntry*> childScopes; // scopes directly within this scope, for ST_HEAD only
     std::string name;

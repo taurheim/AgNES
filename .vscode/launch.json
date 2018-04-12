@@ -5,6 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "(lldb) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/Users/elainebilbily/OneDrive - McMaster University/school/4tb3/AgNES/build/AgNES",
+      "args": ["input.c", "output.s"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": true,
+      "MIMode": "lldb",
+    },
+    {
       "name": "(gdb) WSL Launch",
       "type": "cppdbg",
       "request": "launch",
