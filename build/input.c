@@ -1,15 +1,15 @@
 int x, y;
 
-int moveRight(int amount) {
-    x = x + amount;
+int moveLeft(int amount) {
+    x = x - amount;
 }
 
 int main() {
-    x = 20;
+    x = 100;
     y = 40;
     while (1){
         NESWAITFORFRAME;
-        moveRight(1);
+        moveLeft(1);
         NESSETSPRITEX x;
         NESSETSPRITEY y;
     }

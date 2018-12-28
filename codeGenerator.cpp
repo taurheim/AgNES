@@ -51,6 +51,10 @@ void CodeGenerator::generateCodeFromTAC(TAC tac) {
             generateAddition(tac);
             break;
         }
+        case IR_SUBTRACT: {
+            generateSubtraction(tac);
+            break;
+        }
         case IR_IFTRUEGOTO: {
             generateBranchOnCondition(tac, true);
             break;
@@ -192,8 +196,7 @@ void CodeGenerator::generateAddition(TAC tac) {
 
     // For now, use $0 as our adder
     // This is bad and should not be done this way
-
-    // Set result to 0 to start
+    // Reset A to 0
     loadConstIntoA(0);
     code << "STA $0" << nl;
 
@@ -207,6 +210,32 @@ void CodeGenerator::generateAddition(TAC tac) {
     loadLocalIntoA(arg2.value);
     code << "CLC" << nl;
     code << "ADC $0" << nl;
+
+    // Store the output
+    storeAIntoLocal(assignTo.value);
+}
+
+void CodeGenerator::generateSubtraction(TAC tac) {
+    code << "; subtract " << tac.first << " := " << tac.second << " - " << tac.third << nl;
+    CodeVar assignTo = lookup(tac.first);
+    // TODO why are these flipped?
+    CodeVar arg1 = lookup(tac.third);
+    CodeVar arg2 = lookup(tac.second);
+
+    // Reset A to 0
+    loadConstIntoA(0);
+    code << "STA $0" << nl;
+
+    // Add arg1
+    loadLocalIntoA(arg1.value);
+    code << "CLC" << nl;
+    code << "ADC $0" << nl;
+    code << "STA $0" << nl;
+
+    // Subtract arg2
+    loadLocalIntoA(arg2.value);
+    code << "CLC" << nl;
+    code << "SBC $0" << nl;
 
     // Store the output
     storeAIntoLocal(assignTo.value);

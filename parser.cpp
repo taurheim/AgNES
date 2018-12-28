@@ -456,6 +456,10 @@ ASTNode * Parser::op() {
             node->operation = "+";
             break;
         }
+        case T_MINUS: {
+            node->operation = "-";
+            break;
+        }
         default: {
             reject("Operation not supported");
         }

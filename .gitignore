@@ -35,3 +35,7 @@
 
 # Example folder
 example/
+
+# Build files
+build/AgNES
+build/game.s

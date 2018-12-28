@@ -48,6 +48,7 @@ class CodeGenerator {
         void generateCodeFromTAC(TAC tac);
         void generateAssign(TAC tac);
         void generateAddition(TAC tac);
+        void generateSubtraction(TAC tac);
         void generateBranchOnCondition(TAC tac, bool condition);
         void generateJump(TAC tac);
         void generatePushParam(TAC tac);
